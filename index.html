@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogiTurnos — Gestão de Escalas</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --surface3: #2a2a2a;
+    --border: #333;
+    --border2: #444;
+    --accent: #e8ff4a;
+    --accent-dim: #c8df30;
+    --text: #f0f0f0;
+    --text2: #a0a0a0;
+    --text3: #666;
+    --green: #4ade80;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --blue: #60a5fa;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ─── TELA DE LOGIN ─── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #login-screen::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(232,255,74,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .login-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+
+  .login-logo span { color: var(--accent); }
+
+  .login-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 2.5rem;
+  }
+
+  .form-group { margin-bottom: 1.25rem; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="email"], input[type="password"], input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  select option { background: var(--surface2); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0f0f;
+    width: 100%;
+  }
+
+  .btn-primary:hover { background: var(--accent-dim); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 0.5px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 0.5px solid var(--red);
+  }
+
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+  .btn-success {
+    background: transparent;
+    color: var(--green);
+    border: 0.5px solid var(--green);
+  }
+
+  .btn-success:hover { background: rgba(74,222,128,0.1); }
+
+  .btn-sm { padding: 0.4rem 0.85rem; font-size: 12px; }
+
+  .msg-error {
+    background: rgba(248,113,113,0.1);
+    border: 0.5px solid var(--red);
+    border-radius: var(--radius-sm);
+    color: var(--red);
+    font-size: 13px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .msg-success {
+    background: rgba(74,222,128,0.1);
+    border: 0.5px solid var(--green);
+    border-radius: var(--radius-sm);
+    color: var(--green);
+    font-size: 13px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  /* ─── APP LAYOUT ─── */
+  #app { display: none; min-height: 100vh; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 58px;
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .topbar-logo span { color: var(--accent); }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-info {
+    text-align: right;
+  }
+
+  .user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .user-role {
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #0f0f0f;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0 2rem;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+  }
+
+  .nav-tab {
+    padding: 0.75rem 1.25rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    border-radius: 0;
+  }
+
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .page-desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 0.25rem;
+  }
+
+  /* ─── STAT CARDS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 0.25rem;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-body { padding: 1.5rem; }
+
+  /* ─── TABLE ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    font-size: 13px;
+    color: var(--text);
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* ─── BADGES ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+    gap: 4px;
+  }
+
+  .badge-pending { background: rgba(251,191,36,0.15); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
+  .badge-approved { background: rgba(74,222,128,0.12); color: var(--green); border: 0.5px solid rgba(74,222,128,0.3); }
+  .badge-rejected { background: rgba(248,113,113,0.12); color: var(--red); border: 0.5px solid rgba(248,113,113,0.3); }
+  .badge-admin { background: rgba(232,255,74,0.12); color: var(--accent); border: 0.5px solid rgba(232,255,74,0.3); }
+  .badge-driver { background: rgba(96,165,250,0.12); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
+
+  /* ─── SCORE BAR ─── */
+  .score-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .score-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 100px;
+    overflow: hidden;
+    max-width: 80px;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--accent);
+    transition: width 0.4s;
+  }
+
+  .score-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+    min-width: 32px;
+  }
+
+  /* ─── WEEK GRID ─── */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .day-col {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .day-header {
+    padding: 0.75rem;
+    text-align: center;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .day-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+  }
+
+  .day-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .day-today .day-header { background: rgba(232,255,74,0.08); border-bottom-color: rgba(232,255,74,0.2); }
+  .day-today .day-name { color: var(--accent); }
+
+  .shift-slot {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    position: relative;
+  }
+
+  .shift-slot:last-child { border-bottom: none; }
+  .shift-slot:hover { background: var(--surface2); }
+
+  .shift-slot.selected {
+    background: rgba(232,255,74,0.1);
+    border-left: 2px solid var(--accent);
+  }
+
+  .shift-slot.full { opacity: 0.5; cursor: not-allowed; }
+
+  .shift-name {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+  }
+
+  .shift-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 1px;
+  }
+
+  .shift-count {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: 14px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--text); }
+
+  .modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+  }
+
+  /* ─── MISC ─── */
+  .empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text3);
+    font-size: 13px;
+  }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1.5rem 0; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text3);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .dot-blink::after {
+    content: '...';
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .notice {
+    background: rgba(232,255,74,0.06);
+    border: 0.5px solid rgba(232,255,74,0.2);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .week-grid { grid-template-columns: repeat(4, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .content { padding: 1rem; }
+    .topbar { padding: 0 1rem; }
+    .nav-tabs { padding: 0 1rem; overflow-x: auto; }
+  }
+
+  @media (max-width: 500px) {
+    .week-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* PAGE SECTIONS */
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN SCREEN ══════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Logi<span>Turnos</span></div>
+    <p class="login-sub">Sistema de gestão de escalas</p>
+
+    <div id="msg-error" class="msg-error"></div>
+    <div id="msg-success" class="msg-success"></div>
+
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com" />
+    </div>
+
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" />
+    </div>
+
+    <button class="btn btn-primary" onclick="doLogin()" id="login-btn">Entrar</button>
+
+    <div style="margin-top:1.5rem; text-align:center;">
+      <span style="font-size:12px; color:var(--text3)">Problemas para acessar? Fale com o administrador.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-logo">Logi<span>Turnos</span></div>
+    <div class="topbar-right">
+      <div class="user-info">
+        <div class="user-name" id="topbar-name">—</div>
+        <div class="user-role" id="topbar-role">—</div>
+      </div>
+      <div class="avatar" id="topbar-avatar">?</div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- Nav Tabs (dinâmico por role) -->
+  <div class="nav-tabs" id="nav-tabs"></div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ── ENTREGADOR: MINHA ESCALA ── -->
+    <div class="page-section" id="sec-driver-schedule">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Solicitar Turnos</div>
+          <div class="page-desc">Selecione os dias e turnos que deseja trabalhar esta semana</div>
+        </div>
+        <button class="btn btn-primary" onclick="submitRequests()">Enviar solicitações</button>
+      </div>
+      <div class="notice">
+        Clique nos turnos desejados para selecioná-los. Turnos <strong style="color:var(--text)">acinzentados</strong> já estão com vagas esgotadas. Suas solicitações ficam aguardando aprovação do administrador.
+      </div>
+      <div class="week-grid" id="week-grid">
+        <div class="loading"><span class="dot-blink">Carregando</span></div>
+      </div>
+    </div>
+
+    <!-- ── ENTREGADOR: MINHAS SOLICITAÇÕES ── -->
+    <div class="page-section" id="sec-driver-requests">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Minhas Solicitações</div>
+          <div class="page-desc">Histórico de turnos solicitados e seus status</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Solicitações recentes</span>
+        </div>
+        <div id="driver-requests-body">
+          <div class="loading"><span class="dot-blink">Carregando</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENTREGADOR: MEU PERFIL ── -->
+    <div class="page-section" id="sec-driver-profile">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Meu Perfil</div>
+          <div class="page-desc">Seu desempenho e informações cadastrais</div>
+        </div>
+      </div>
+      <div class="stats-grid" id="driver-stats-grid"></div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Histórico de performance</span></div>
+        <div id="driver-perf-body" class="card-body">
+          <div class="loading"><span class="dot-blink">Carregando</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN: DASHBOARD ── -->
+    <div class="page-section" id="sec-admin-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-desc">Visão geral das escalas desta semana</div>
+        </div>
+      </div>
+      <div class="stats-grid" id="admin-stats"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Solicitações pendentes</span>
+          <span id="pending-count" class="badge badge-pending">0</span>
+        </div>
+        <div id="pending-requests-body">
+          <div class="loading"><span class="dot-blink">Carregando</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN: ESCALA DA SEMANA ── -->
+    <div class="page-section" id="sec-admin-schedule">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Escala da Semana</div>
+          <div class="page-desc">Visualização completa de todos os turnos</div>
+        </div>
+      </div>
+      <div class="week-grid" id="admin-week-grid">
+        <div class="loading"><span class="dot-blink">Carregando</span></div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN: ENTREGADORES ── -->
+    <div class="page-section" id="sec-admin-drivers">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Entregadores</div>
+          <div class="page-desc">Cadastro e gestão de performance</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-driver')">+ Novo entregador</button>
+      </div>
+      <div class="card">
+        <div id="drivers-table-body">
+          <div class="loading"><span class="dot-blink">Carregando</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN: TURNOS ── -->
+    <div class="page-section" id="sec-admin-shifts">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Configurar Turnos</div>
+          <div class="page-desc">Defina os turnos disponíveis para a equipe</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-shift')">+ Novo turno</button>
+      </div>
+      <div class="card">
+        <div id="shifts-table-body">
+          <div class="loading"><span class="dot-blink">Carregando</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- ══════════════════ MODAIS ══════════════════ -->
+
+<!-- Modal: adicionar entregador -->
+<div class="modal-overlay" id="modal-add-driver">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-driver')">✕</button>
+    <div class="modal-title">Novo entregador</div>
+    <div id="modal-driver-error" class="msg-error"></div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="new-driver-name" placeholder="João Silva" />
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="new-driver-email" placeholder="joao@email.com" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Telefone</label>
+        <input type="text" id="new-driver-phone" placeholder="(11) 99999-9999" />
+      </div>
+      <div class="form-group">
+        <label>Score inicial (0–100)</label>
+        <input type="number" id="new-driver-score" placeholder="70" min="0" max="100" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Senha temporária</label>
+      <input type="password" id="new-driver-pass" placeholder="Mínimo 6 caracteres" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-driver')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addDriver()" id="btn-add-driver">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: adicionar turno -->
+<div class="modal-overlay" id="modal-add-shift">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-shift')">✕</button>
+    <div class="modal-title">Novo turno</div>
+    <div id="modal-shift-error" class="msg-error"></div>
+    <div class="form-group">
+      <label>Nome do turno</label>
+      <input type="text" id="new-shift-name" placeholder="Ex: Manhã, Tarde, Noite" />
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Horário início</label>
+        <input type="text" id="new-shift-start" placeholder="08:00" />
+      </div>
+      <div class="form-group">
+        <label>Horário fim</label>
+        <input type="text" id="new-shift-end" placeholder="14:00" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Vagas por dia</label>
+      <input type="number" id="new-shift-slots" placeholder="5" min="1" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-shift')">Cancelar</button>
+      <button class="btn btn-primary" onclick="addShift()">Salvar turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: editar performance -->
+<div class="modal-overlay" id="modal-perf">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-perf')">✕</button>
+    <div class="modal-title">Atualizar performance</div>
+    <input type="hidden" id="perf-driver-id" />
+    <div id="modal-perf-error" class="msg-error"></div>
+    <div class="form-group">
+      <label>Entregador</label>
+      <input type="text" id="perf-driver-name" disabled />
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Entregas no prazo (%)</label>
+        <input type="number" id="perf-delivery" min="0" max="100" placeholder="90" />
+      </div>
+      <div class="form-group">
+        <label>Avaliação do cliente (0–10)</label>
+        <input type="number" id="perf-rating" min="0" max="10" step="0.1" placeholder="8.5" />
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label>Assiduidade (%)</label>
+        <input type="number" id="perf-attendance" min="0" max="100" placeholder="95" />
+      </div>
+      <div class="form-group">
+        <label>Mês de referência</label>
+        <input type="text" id="perf-month" placeholder="2024-01" />
+      </div>
+    </div>
+    <div class="notice">
+      Score calculado automaticamente:<br>
+      <strong style="color:var(--text)">(entregas × 0,4) + (avaliação × 0,3 × 10) + (assiduidade × 0,3)</strong>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-perf')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePerformance()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: detalhes do turno (admin) -->
+<div class="modal-overlay" id="modal-shift-detail">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-shift-detail')">✕</button>
+    <div class="modal-title" id="shift-detail-title">Turno</div>
+    <div id="shift-detail-body"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIGURAÇÃO — SUBSTITUA PELOS SEUS DADOS
+// ══════════════════════════════════════════
+const SUPABASE_URL = 'COLE_SUA_SUPABASE_URL_AQUI';
+const SUPABASE_KEY = 'COLE_SUA_ANON_KEY_AQUI';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ──────────────────────────────────────────
+// ESTADO GLOBAL
+// ──────────────────────────────────────────
+let currentUser = null;
+let currentProfile = null;
+let allShifts = [];
+let selectedSlots = new Set();
+
+const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAY_FULL = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+// ──────────────────────────────────────────
+// INICIALIZAÇÃO
+// ──────────────────────────────────────────
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadApp();
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN') {
+      currentUser = session.user;
+      await loadApp();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentProfile = null;
+      showLogin();
+    }
+  });
+}
+
+async function loadApp() {
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = profile;
+  if (!profile) return;
+
+  document.getElementById('topbar-name').textContent = profile.nome;
+  document.getElementById('topbar-role').textContent = profile.role === 'admin' ? 'Administrador' : 'Entregador';
+  document.getElementById('topbar-avatar').textContent = profile.nome.charAt(0).toUpperCase();
+
+  buildNav(profile.role);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  if (profile.role === 'admin') {
+    showSection('sec-admin-dashboard');
+    loadAdminDashboard();
+  } else {
+    showSection('sec-driver-schedule');
+    loadDriverSchedule();
+  }
+}
+
+// ──────────────────────────────────────────
+// NAV
+// ──────────────────────────────────────────
+function buildNav(role) {
+  const container = document.getElementById('nav-tabs');
+  container.innerHTML = '';
+  const tabs = role === 'admin'
+    ? [
+        { id: 'sec-admin-dashboard', label: 'Dashboard', fn: 'loadAdminDashboard' },
+        { id: 'sec-admin-schedule', label: 'Escala da Semana', fn: 'loadAdminWeekGrid' },
+        { id: 'sec-admin-drivers', label: 'Entregadores', fn: 'loadDriversTable' },
+        { id: 'sec-admin-shifts', label: 'Turnos', fn: 'loadShiftsTable' },
+      ]
+    : [
+        { id: 'sec-driver-schedule', label: 'Solicitar Turnos', fn: 'loadDriverSchedule' },
+        { id: 'sec-driver-requests', label: 'Minhas Solicitações', fn: 'loadDriverRequests' },
+        { id: 'sec-driver-profile', label: 'Meu Perfil', fn: 'loadDriverProfile' },
+      ];
+
+  tabs.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'nav-tab';
+    el.id = 'tab-' + t.id;
+    el.textContent = t.label;
+    el.onclick = () => { showSection(t.id); window[t.fn](); };
+    container.appendChild(el);
+  });
+}
+
+function showSection(id) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+  document.getElementById('tab-' + id)?.classList.add('active');
+}
+
+// ──────────────────────────────────────────
+// AUTH
+// ──────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const btn = document.getElementById('login-btn');
+  hideMessages();
+  if (!email || !pass) { showError('Preencha e-mail e senha.'); return; }
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { showError('E-mail ou senha incorretos.'); btn.textContent = 'Entrar'; btn.disabled = false; }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-btn').textContent = 'Entrar';
+  document.getElementById('login-btn').disabled = false;
+}
+
+// ──────────────────────────────────────────
+// HELPERS UI
+// ──────────────────────────────────────────
+function showError(msg, elId = 'msg-error') {
+  const el = document.getElementById(elId);
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function showSuccess(msg, elId = 'msg-success') {
+  const el = document.getElementById(elId);
+  if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
+}
+
+function hideMessages() {
+  document.querySelectorAll('.msg-error, .msg-success').forEach(e => e.style.display = 'none');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); hideMessages(); }
+
+function scoreBadgeColor(score) {
+  if (score >= 80) return 'var(--green)';
+  if (score >= 60) return 'var(--amber)';
+  return 'var(--red)';
+}
+
+function statusBadge(status) {
+  if (status === 'aprovado') return '<span class="badge badge-approved">✓ Aprovado</span>';
+  if (status === 'recusado') return '<span class="badge badge-rejected">✕ Recusado</span>';
+  return '<span class="badge badge-pending">⏳ Pendente</span>';
+}
+
+function getWeekDates() {
+  const today = new Date();
+  const day = today.getDay();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - day);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sunday);
+    d.setDate(sunday.getDate() + i);
+    return d;
+  });
+}
+
+// ──────────────────────────────────────────
+// ENTREGADOR — GRADE DE TURNOS
+// ──────────────────────────────────────────
+async function loadDriverSchedule() {
+  selectedSlots.clear();
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '<div class="loading"><span class="dot-blink">Carregando</span></div>';
+
+  const [{ data: shifts }, { data: myReqs }, { data: allReqs }] = await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*').eq('usuario_id', currentUser.id),
+    sb.from('solicitacoes').select('*').eq('status', 'aprovado'),
+  ]);
+
+  allShifts = shifts || [];
+  const myReqsMap = {};
+  (myReqs || []).forEach(r => myReqsMap[r.turno_id + '_' + r.dia_semana] = r);
+
+  const aprovadoCount = {};
+  (allReqs || []).forEach(r => {
+    const k = r.turno_id + '_' + r.dia_semana;
+    aprovadoCount[k] = (aprovadoCount[k] || 0) + 1;
+  });
+
+  const weekDates = getWeekDates();
+  const today = new Date().getDay();
+  grid.innerHTML = '';
+
+  weekDates.forEach((date, dayIndex) => {
+    const col = document.createElement('div');
+    col.className = 'day-col' + (dayIndex === today ? ' day-today' : '');
+
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    header.innerHTML = `<div class="day-name">${DAYS[dayIndex]}</div><div class="day-date">${date.getDate()}</div>`;
+    col.appendChild(header);
+
+    if (!allShifts.length) {
+      col.innerHTML += '<div style="padding:0.5rem;font-size:11px;color:var(--text3);text-align:center">Sem turnos</div>';
+    }
+
+    allShifts.forEach(shift => {
+      const key = shift.id + '_' + dayIndex;
+      const myReq = myReqsMap[key];
+      const aprovados = aprovadoCount[key] || 0;
+      const isFull = aprovados >= shift.vagas && !myReq;
+      const isSelected = selectedSlots.has(key);
+      const isApproved = myReq?.status === 'aprovado';
+      const isPending = myReq?.status === 'pendente';
+
+      const slot = document.createElement('div');
+      slot.className = 'shift-slot' + (isSelected ? ' selected' : '') + (isFull && !myReq ? ' full' : '');
+
+      let statusIndicator = '';
+      if (isApproved) statusIndicator = '<span style="font-size:10px;color:var(--green)">✓ Aprovado</span>';
+      else if (isPending) statusIndicator = '<span style="font-size:10px;color:var(--amber)">⏳ Aguardando</span>';
+
+      slot.innerHTML = `
+        <div class="shift-name">${shift.nome}</div>
+        <div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
+        <div class="shift-count">${aprovados}/${shift.vagas} vagas</div>
+        ${statusIndicator}
+      `;
+
+      if (!isFull && !myReq) {
+        slot.onclick = () => {
+          if (selectedSlots.has(key)) { selectedSlots.delete(key); slot.classList.remove('selected'); }
+          else { selectedSlots.add(key); slot.classList.add('selected'); }
+        };
+      }
+
+      col.appendChild(slot);
+    });
+
+    grid.appendChild(col);
+  });
+}
+
+async function submitRequests() {
+  if (!selectedSlots.size) { alert('Selecione pelo menos um turno.'); return; }
+
+  const rows = Array.from(selectedSlots).map(key => {
+    const [turno_id, dia_semana] = key.split('_');
+    return { usuario_id: currentUser.id, turno_id, dia_semana: parseInt(dia_semana), status: 'pendente' };
+  });
+
+  const { error } = await sb.from('solicitacoes').upsert(rows, { onConflict: 'usuario_id,turno_id,dia_semana' });
+  if (error) { alert('Erro ao enviar: ' + error.message); return; }
+
+  alert(`${rows.length} solicitação(ões) enviada(s)! Aguarde a aprovação do administrador.`);
+  selectedSlots.clear();
+  loadDriverSchedule();
+}
+
+// ──────────────────────────────────────────
+// ENTREGADOR — MINHAS SOLICITAÇÕES
+// ──────────────────────────────────────────
+async function loadDriverRequests() {
+  const body = document.getElementById('driver-requests-body');
+  const { data } = await sb.from('solicitacoes')
+    .select('*, turno:turno_id(*)')
+    .eq('usuario_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (!data?.length) { body.innerHTML = '<div class="empty">Você ainda não fez nenhuma solicitação.</div>'; return; }
+
+  body.innerHTML = `<table>
+    <thead><tr><th>Turno</th><th>Horário</th><th>Dia</th><th>Status</th><th>Data</th></tr></thead>
+    <tbody>
+    ${data.map(r => `<tr>
+      <td>${r.turno?.nome || '—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px">${r.turno?.horario_inicio?.slice(0,5) || '—'}–${r.turno?.horario_fim?.slice(0,5) || '—'}</td>
+      <td>${DAY_FULL[r.dia_semana] || '—'}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td style="color:var(--text3);font-size:12px">${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ──────────────────────────────────────────
+// ENTREGADOR — MEU PERFIL
+// ──────────────────────────────────────────
+async function loadDriverProfile() {
+  const { data: perfs } = await sb.from('performance')
+    .select('*')
+    .eq('usuario_id', currentUser.id)
+    .order('mes', { ascending: false });
+
+  const { data: reqs } = await sb.from('solicitacoes')
+    .select('*')
+    .eq('usuario_id', currentUser.id);
+
+  const aprovados = (reqs || []).filter(r => r.status === 'aprovado').length;
+  const total = (reqs || []).length;
+
+  const statsGrid = document.getElementById('driver-stats-grid');
+  statsGrid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Score atual</div>
+      <div class="stat-value" style="color:${scoreBadgeColor(currentProfile.score || 0)}">${Math.round(currentProfile.score || 0)}</div>
+      <div class="stat-sub">de 100 pontos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Turnos aprovados</div>
+      <div class="stat-value">${aprovados}</div>
+      <div class="stat-sub">de ${total} solicitados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Registros de perf.</div>
+      <div class="stat-value">${(perfs || []).length}</div>
+      <div class="stat-sub">meses avaliados</div>
+    </div>
+  `;
+
+  const body = document.getElementById('driver-perf-body');
+  if (!perfs?.length) { body.innerHTML = '<div class="empty">Nenhum registro de performance ainda.</div>'; return; }
+
+  body.innerHTML = `<table>
+    <thead><tr><th>Mês</th><th>Entregas no prazo</th><th>Avaliação cliente</th><th>Assiduidade</th><th>Score</th></tr></thead>
+    <tbody>
+    ${perfs.map(p => `<tr>
+      <td style="font-family:'DM Mono',monospace">${p.mes}</td>
+      <td>${p.entregas_prazo}%</td>
+      <td>${p.avaliacao_cliente}/10</td>
+      <td>${p.assiduidade}%</td>
+      <td>
+        <div class="score-bar">
+          <div class="score-track"><div class="score-fill" style="width:${p.score}%"></div></div>
+          <span class="score-num" style="color:${scoreBadgeColor(p.score)}">${Math.round(p.score)}</span>
+        </div>
+      </td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ──────────────────────────────────────────
+// ADMIN — DASHBOARD
+// ──────────────────────────────────────────
+async function loadAdminDashboard() {
+  const [
+    { data: drivers },
+    { data: pending },
+    { data: approved },
+    { data: shifts }
+  ] = await Promise.all([
+    sb.from('profiles').select('*').eq('role', 'entregador'),
+    sb.from('solicitacoes').select('*').eq('status', 'pendente'),
+    sb.from('solicitacoes').select('*').eq('status', 'aprovado'),
+    sb.from('turnos').select('*'),
+  ]);
+
+  document.getElementById('admin-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Entregadores ativos</div>
+      <div class="stat-value">${(drivers||[]).length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Solicitações pendentes</div>
+      <div class="stat-value" style="color:var(--amber)">${(pending||[]).length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Turnos aprovados (semana)</div>
+      <div class="stat-value" style="color:var(--green)">${(approved||[]).length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Turnos configurados</div>
+      <div class="stat-value">${(shifts||[]).length}</div>
+    </div>
+  `;
+
+  document.getElementById('pending-count').textContent = (pending||[]).length;
+
+  if (!(pending||[]).length) {
+    document.getElementById('pending-requests-body').innerHTML = '<div class="empty">Nenhuma solicitação pendente 🎉</div>';
+    return;
+  }
+
+  const ids = [...new Set(pending.map(r => r.usuario_id))];
+  const { data: profs } = await sb.from('profiles').select('*').in('id', ids);
+  const profMap = {};
+  (profs||[]).forEach(p => profMap[p.id] = p);
+
+  const shiftIds = [...new Set(pending.map(r => r.turno_id))];
+  const { data: shiftData } = await sb.from('turnos').select('*').in('id', shiftIds);
+  const shiftMap = {};
+  (shiftData||[]).forEach(s => shiftMap[s.id] = s);
+
+  const pendingSorted = [...pending].sort((a, b) => {
+    const sa = profMap[b.usuario_id]?.score || 0;
+    const sb2 = profMap[a.usuario_id]?.score || 0;
+    return sa - sb2;
+  });
+
+  document.getElementById('pending-requests-body').innerHTML = `<table>
+    <thead><tr><th>Entregador</th><th>Score</th><th>Turno</th><th>Dia</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${pendingSorted.map(r => {
+      const prof = profMap[r.usuario_id] || {};
+      const shift = shiftMap[r.turno_id] || {};
+      return `<tr>
+        <td>${prof.nome || '—'}</td>
+        <td>
+          <div class="score-bar">
+            <div class="score-track"><div class="score-fill" style="width:${prof.score||0}%"></div></div>
+            <span class="score-num" style="color:${scoreBadgeColor(prof.score||0)}">${Math.round(prof.score||0)}</span>
+          </div>
+        </td>
+        <td>${shift.nome || '—'} <span style="color:var(--text3);font-size:12px;font-family:'DM Mono',monospace">${(shift.horario_inicio||'').slice(0,5)}–${(shift.horario_fim||'').slice(0,5)}</span></td>
+        <td>${DAY_FULL[r.dia_semana] || '—'}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn btn-success btn-sm" onclick="reviewRequest('${r.id}', 'aprovado')">Aprovar</button>
+            <button class="btn btn-danger btn-sm" onclick="reviewRequest('${r.id}', 'recusado')">Recusar</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table>`;
+}
+
+async function reviewRequest(id, status) {
+  await sb.from('solicitacoes').update({ status }).eq('id', id);
+  loadAdminDashboard();
+}
+
+// ──────────────────────────────────────────
+// ADMIN — ESCALA DA SEMANA
+// ──────────────────────────────────────────
+async function loadAdminWeekGrid() {
+  const grid = document.getElementById('admin-week-grid');
+  grid.innerHTML = '<div class="loading"><span class="dot-blink">Carregando</span></div>';
+
+  const [{ data: shifts }, { data: approved }] = await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*, profile:usuario_id(nome, score)').eq('status', 'aprovado'),
+  ]);
+
+  const weekDates = getWeekDates();
+  const today = new Date().getDay();
+  grid.innerHTML = '';
+
+  weekDates.forEach((date, dayIndex) => {
+    const col = document.createElement('div');
+    col.className = 'day-col' + (dayIndex === today ? ' day-today' : '');
+
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    header.innerHTML = `<div class="day-name">${DAYS[dayIndex]}</div><div class="day-date">${date.getDate()}</div>`;
+    col.appendChild(header);
+
+    (shifts||[]).forEach(shift => {
+      const slotDrivers = (approved||[]).filter(r => r.turno_id === shift.id && r.dia_semana === dayIndex);
+      const slot = document.createElement('div');
+      slot.className = 'shift-slot';
+      slot.style.cursor = 'pointer';
+      slot.innerHTML = `
+        <div class="shift-name">${shift.nome}</div>
+        <div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
+        <div class="shift-count" style="color:${slotDrivers.length >= shift.vagas ? 'var(--green)' : 'var(--amber)'}">
+          ${slotDrivers.length}/${shift.vagas} alocados
+        </div>
+      `;
+      slot.onclick = () => showShiftDetail(shift, dayIndex, slotDrivers);
+      col.appendChild(slot);
+    });
+
+    grid.appendChild(col);
+  });
+}
+
+function showShiftDetail(shift, dayIndex, drivers) {
+  document.getElementById('shift-detail-title').textContent = `${shift.nome} — ${DAY_FULL[dayIndex]}`;
+  const body = document.getElementById('shift-detail-body');
+
+  if (!drivers.length) {
+    body.innerHTML = '<div class="empty">Nenhum entregador alocado neste turno.</div>';
+  } else {
+    body.innerHTML = `<table>
+      <thead><tr><th>Entregador</th><th>Score</th></tr></thead>
+      <tbody>
+      ${drivers.map(r => `<tr>
+        <td>${r.profile?.nome || '—'}</td>
+        <td>
+          <div class="score-bar">
+            <div class="score-track"><div class="score-fill" style="width:${r.profile?.score||0}%"></div></div>
+            <span class="score-num" style="color:${scoreBadgeColor(r.profile?.score||0)}">${Math.round(r.profile?.score||0)}</span>
+          </div>
+        </td>
+      </tr>`).join('')}
+      </tbody></table>`;
+  }
+
+  openModal('modal-shift-detail');
+}
+
+// ──────────────────────────────────────────
+// ADMIN — ENTREGADORES
+// ──────────────────────────────────────────
+async function loadDriversTable() {
+  const body = document.getElementById('drivers-table-body');
+  const { data } = await sb.from('profiles').select('*').eq('role', 'entregador').order('score', { ascending: false });
+
+  if (!data?.length) { body.innerHTML = '<div class="empty">Nenhum entregador cadastrado ainda.</div>'; return; }
+
+  body.innerHTML = `<table>
+    <thead><tr><th>#</th><th>Nome</th><th>E-mail</th><th>Score</th><th>Performance</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${data.map((d, i) => `<tr>
+      <td style="color:var(--text3);font-family:'DM Mono',monospace">${i+1}</td>
+      <td style="font-weight:500">${d.nome}</td>
+      <td style="color:var(--text2)">${d.email || '—'}</td>
+      <td>
+        <div class="score-bar">
+          <div class="score-track"><div class="score-fill" style="width:${d.score||0}%"></div></div>
+          <span class="score-num" style="color:${scoreBadgeColor(d.score||0)};font-weight:500">${Math.round(d.score||0)}</span>
+        </div>
+      </td>
+      <td><span class="badge ${d.score>=80?'badge-approved':d.score>=60?'badge-pending':'badge-rejected'}">${d.score>=80?'Ótimo':d.score>=60?'Regular':'Baixo'}</span></td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-ghost btn-sm" onclick="openPerfModal('${d.id}','${d.nome}')">Atualizar perf.</button>
+        </div>
+      </td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+async function addDriver() {
+  const nome = document.getElementById('new-driver-name').value.trim();
+  const email = document.getElementById('new-driver-email').value.trim();
+  const phone = document.getElementById('new-driver-phone').value.trim();
+  const score = parseFloat(document.getElementById('new-driver-score').value) || 70;
+  const pass = document.getElementById('new-driver-pass').value;
+
+  if (!nome || !email || !pass) { showError('Preencha nome, e-mail e senha.', 'modal-driver-error'); return; }
+  if (pass.length < 6) { showError('Senha deve ter ao menos 6 caracteres.', 'modal-driver-error'); return; }
+
+  const btn = document.getElementById('btn-add-driver');
+  btn.textContent = 'Cadastrando...';
+  btn.disabled = true;
+
+  const { data, error } = await sb.auth.admin.createUser({ email, password: pass, email_confirm: true });
+
+  if (error) {
+    // Fallback: sign up normal (o trigger vai criar o profile)
+    const { data: su, error: se } = await sb.auth.signUp({ email, password: pass });
+    if (se) { showError('Erro: ' + se.message, 'modal-driver-error'); btn.textContent = 'Cadastrar'; btn.disabled = false; return; }
+
+    await sb.from('profiles').upsert({
+      id: su.user.id,
+      nome,
+      email,
+      telefone: phone,
+      score,
+      role: 'entregador'
+    });
+  } else {
+    await sb.from('profiles').upsert({
+      id: data.user.id,
+      nome,
+      email,
+      telefone: phone,
+      score,
+      role: 'entregador'
+    });
+  }
+
+  closeModal('modal-add-driver');
+  btn.textContent = 'Cadastrar';
+  btn.disabled = false;
+  loadDriversTable();
+}
+
+function openPerfModal(id, nome) {
+  document.getElementById('perf-driver-id').value = id;
+  document.getElementById('perf-driver-name').value = nome;
+  const now = new Date();
+  document.getElementById('perf-month').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  openModal('modal-perf');
+}
+
+async function savePerformance() {
+  const userId = document.getElementById('perf-driver-id').value;
+  const delivery = parseFloat(document.getElementById('perf-delivery').value);
+  const rating = parseFloat(document.getElementById('perf-rating').value);
+  const attendance = parseFloat(document.getElementById('perf-attendance').value);
+  const month = document.getElementById('perf-month').value;
+
+  if (isNaN(delivery)||isNaN(rating)||isNaN(attendance)) { showError('Preencha todos os campos.','modal-perf-error'); return; }
+
+  const score = Math.round((delivery * 0.4) + (rating * 10 * 0.3) + (attendance * 0.3));
+
+  await sb.from('performance').upsert({
+    usuario_id: userId,
+    mes: month,
+    entregas_prazo: delivery,
+    avaliacao_cliente: rating,
+    assiduidade: attendance,
+    score
+  }, { onConflict: 'usuario_id,mes' });
+
+  await sb.from('profiles').update({ score }).eq('id', userId);
+
+  closeModal('modal-perf');
+  loadDriversTable();
+}
+
+// ──────────────────────────────────────────
+// ADMIN — TURNOS
+// ──────────────────────────────────────────
+async function loadShiftsTable() {
+  const body = document.getElementById('shifts-table-body');
+  const { data } = await sb.from('turnos').select('*').order('horario_inicio');
+
+  if (!data?.length) { body.innerHTML = '<div class="empty">Nenhum turno cadastrado. Crie o primeiro!</div>'; return; }
+
+  body.innerHTML = `<table>
+    <thead><tr><th>Nome</th><th>Início</th><th>Fim</th><th>Vagas/dia</th><th>Ações</th></tr></thead>
+    <tbody>
+    ${data.map(s => `<tr>
+      <td style="font-weight:500">${s.nome}</td>
+      <td style="font-family:'DM Mono',monospace">${s.horario_inicio.slice(0,5)}</td>
+      <td style="font-family:'DM Mono',monospace">${s.horario_fim.slice(0,5)}</td>
+      <td>${s.vagas}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="deleteShift('${s.id}')">Excluir</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+async function addShift() {
+  const nome = document.getElementById('new-shift-name').value.trim();
+  const start = document.getElementById('new-shift-start').value.trim();
+  const end = document.getElementById('new-shift-end').value.trim();
+  const slots = parseInt(document.getElementById('new-shift-slots').value) || 5;
+
+  if (!nome || !start || !end) { showError('Preencha todos os campos.', 'modal-shift-error'); return; }
+
+  const { error } = await sb.from('turnos').insert({ nome, horario_inicio: start + ':00', horario_fim: end + ':00', vagas: slots });
+  if (error) { showError('Erro: ' + error.message, 'modal-shift-error'); return; }
+
+  closeModal('modal-add-shift');
+  loadShiftsTable();
+}
+
+async function deleteShift(id) {
+  if (!confirm('Excluir este turno? Todas as solicitações relacionadas também serão removidas.')) return;
+  await sb.from('solicitacoes').delete().eq('turno_id', id);
+  await sb.from('turnos').delete().eq('id', id);
+  loadShiftsTable();
+}
+
+// ──────────────────────────────────────────
+// BOOT
+// ──────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
