@@ -7,1592 +7,1350 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f0f0f;
-    --surface: #181818;
-    --surface2: #222222;
-    --surface3: #2a2a2a;
-    --border: #333;
-    --border2: #444;
-    --accent: #e8ff4a;
-    --accent-dim: #c8df30;
-    --text: #f0f0f0;
-    --text2: #a0a0a0;
-    --text3: #666;
-    --green: #4ade80;
-    --red: #f87171;
-    --amber: #fbbf24;
-    --blue: #60a5fa;
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
-
-  /* ─── TELA DE LOGIN ─── */
-  #login-screen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg);
-    position: relative;
-    overflow: hidden;
-  }
-
-  #login-screen::before {
-    content: '';
-    position: fixed;
-    top: -30%;
-    left: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(232,255,74,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .login-box {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: 16px;
-    padding: 3rem 2.5rem;
-    width: 100%;
-    max-width: 400px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .login-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-  }
-
-  .login-logo span { color: var(--accent); }
-
-  .login-sub {
-    font-size: 13px;
-    color: var(--text2);
-    margin-bottom: 2.5rem;
-  }
-
-  .form-group { margin-bottom: 1.25rem; }
-
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.5rem;
-  }
-
-  input[type="email"], input[type="password"], input[type="text"], input[type="number"], select, textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    padding: 0.75rem 1rem;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
-  }
-
-  select option { background: var(--surface2); }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-sm);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-    text-decoration: none;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #0f0f0f;
-    width: 100%;
-  }
-
-  .btn-primary:hover { background: var(--accent-dim); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--text2);
-    border: 0.5px solid var(--border);
-  }
-
-  .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
-
-  .btn-danger {
-    background: transparent;
-    color: var(--red);
-    border: 0.5px solid var(--red);
-  }
-
-  .btn-danger:hover { background: rgba(248,113,113,0.1); }
-
-  .btn-success {
-    background: transparent;
-    color: var(--green);
-    border: 0.5px solid var(--green);
-  }
-
-  .btn-success:hover { background: rgba(74,222,128,0.1); }
-
-  .btn-sm { padding: 0.4rem 0.85rem; font-size: 12px; }
-
-  .msg-error {
-    background: rgba(248,113,113,0.1);
-    border: 0.5px solid var(--red);
-    border-radius: var(--radius-sm);
-    color: var(--red);
-    font-size: 13px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    display: none;
-  }
-
-  .msg-success {
-    background: rgba(74,222,128,0.1);
-    border: 0.5px solid var(--green);
-    border-radius: var(--radius-sm);
-    color: var(--green);
-    font-size: 13px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    display: none;
-  }
-
-  /* ─── APP LAYOUT ─── */
-  #app { display: none; min-height: 100vh; }
-
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
-    height: 58px;
-    background: var(--surface);
-    border-bottom: 0.5px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .topbar-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .topbar-logo span { color: var(--accent); }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .user-info {
-    text-align: right;
-  }
-
-  .user-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .user-role {
-    font-size: 11px;
-    color: var(--text3);
-  }
-
-  .avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #0f0f0f;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .nav-tabs {
-    display: flex;
-    gap: 0.25rem;
-    padding: 0 2rem;
-    border-bottom: 0.5px solid var(--border);
-    background: var(--surface);
-  }
-
-  .nav-tab {
-    padding: 0.75rem 1.25rem;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-    border-radius: 0;
-  }
-
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  .content {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  /* ─── PAGE HEADER ─── */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-  }
-
-  .page-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .page-desc {
-    font-size: 13px;
-    color: var(--text2);
-    margin-top: 0.25rem;
-  }
-
-  /* ─── STAT CARDS ─── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.25rem;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text3);
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 26px;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .stat-sub {
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 0.25rem;
-  }
-
-  /* ─── CARDS ─── */
-  .card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 1.5rem;
-  }
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 0.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .card-body { padding: 1.5rem; }
-
-  /* ─── TABLE ─── */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text3);
-    font-weight: 500;
-    padding: 0.75rem 1rem;
-    text-align: left;
-    border-bottom: 0.5px solid var(--border);
-  }
-
-  td {
-    padding: 0.85rem 1rem;
-    font-size: 13px;
-    color: var(--text);
-    border-bottom: 0.5px solid var(--border);
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface2); }
-
-  /* ─── BADGES ─── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 10px;
-    border-radius: 100px;
-    font-size: 11px;
-    font-weight: 500;
-    gap: 4px;
-  }
-
-  .badge-pending { background: rgba(251,191,36,0.15); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
-  .badge-approved { background: rgba(74,222,128,0.12); color: var(--green); border: 0.5px solid rgba(74,222,128,0.3); }
-  .badge-rejected { background: rgba(248,113,113,0.12); color: var(--red); border: 0.5px solid rgba(248,113,113,0.3); }
-  .badge-admin { background: rgba(232,255,74,0.12); color: var(--accent); border: 0.5px solid rgba(232,255,74,0.3); }
-  .badge-driver { background: rgba(96,165,250,0.12); color: var(--blue); border: 0.5px solid rgba(96,165,250,0.3); }
-
-  /* ─── SCORE BAR ─── */
-  .score-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .score-track {
-    flex: 1;
-    height: 4px;
-    background: var(--surface3);
-    border-radius: 100px;
-    overflow: hidden;
-    max-width: 80px;
-  }
-
-  .score-fill {
-    height: 100%;
-    border-radius: 100px;
-    background: var(--accent);
-    transition: width 0.4s;
-  }
-
-  .score-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--text2);
-    min-width: 32px;
-  }
-
-  /* ─── WEEK GRID ─── */
-  .week-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-  }
-
-  .day-col {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .day-header {
-    padding: 0.75rem;
-    text-align: center;
-    border-bottom: 0.5px solid var(--border);
-    background: var(--surface2);
-  }
-
-  .day-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text2);
-  }
-
-  .day-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 18px;
-    color: var(--text);
-    margin-top: 2px;
-  }
-
-  .day-today .day-header { background: rgba(232,255,74,0.08); border-bottom-color: rgba(232,255,74,0.2); }
-  .day-today .day-name { color: var(--accent); }
-
-  .shift-slot {
-    padding: 0.5rem 0.6rem;
-    border-bottom: 0.5px solid var(--border);
-    cursor: pointer;
-    transition: background 0.12s;
-    position: relative;
-  }
-
-  .shift-slot:last-child { border-bottom: none; }
-  .shift-slot:hover { background: var(--surface2); }
-
-  .shift-slot.selected {
-    background: rgba(232,255,74,0.1);
-    border-left: 2px solid var(--accent);
-  }
-
-  .shift-slot.full { opacity: 0.5; cursor: not-allowed; }
-
-  .shift-name {
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text3);
-  }
-
-  .shift-time {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--text2);
-    margin-top: 1px;
-  }
-
-  .shift-count {
-    font-size: 10px;
-    color: var(--text3);
-    margin-top: 2px;
-  }
-
-  /* ─── MODAL ─── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 999;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 0.5px solid var(--border2);
-    border-radius: 14px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 480px;
-    position: relative;
-  }
-
-  .modal-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: var(--text);
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--text3);
-    cursor: pointer;
-    font-size: 20px;
-    line-height: 1;
-  }
-
-  .modal-close:hover { color: var(--text); }
-
-  .modal-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-    justify-content: flex-end;
-  }
-
-  /* ─── MISC ─── */
-  .empty {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text3);
-    font-size: 13px;
-  }
-
-  .divider { height: 0.5px; background: var(--border); margin: 1.5rem 0; }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text3);
-    font-size: 13px;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .dot-blink::after {
-    content: '...';
-    animation: blink 1s infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .notice {
-    background: rgba(232,255,74,0.06);
-    border: 0.5px solid rgba(232,255,74,0.2);
-    border-radius: var(--radius-sm);
-    padding: 0.85rem 1rem;
-    font-size: 12px;
-    color: var(--text2);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-
-  .actions-cell {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  @media (max-width: 768px) {
-    .week-grid { grid-template-columns: repeat(4, 1fr); }
-    .grid-2 { grid-template-columns: 1fr; }
-    .content { padding: 1rem; }
-    .topbar { padding: 0 1rem; }
-    .nav-tabs { padding: 0 1rem; overflow-x: auto; }
-  }
-
-  @media (max-width: 500px) {
-    .week-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  /* PAGE SECTIONS */
-  .page-section { display: none; }
-  .page-section.active { display: block; }
+:root{
+  --bg:#0f0f0f;--surface:#181818;--surface2:#222;--surface3:#2a2a2a;
+  --border:#333;--border2:#444;
+  --accent:#e8ff4a;--accent-dim:#c8df30;--accent-bg:rgba(232,255,74,0.07);
+  --text:#f0f0f0;--text2:#a0a0a0;--text3:#555;
+  --green:#4ade80;--green-bg:rgba(74,222,128,0.1);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.1);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.1);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,0.1);
+  --radius:10px;--radius-sm:6px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* LOGIN */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.login-box{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem;width:100%;max-width:400px;}
+.login-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:.2rem;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:2rem;}
+
+/* FORMS */
+label{display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;}
+input[type=email],input[type=password],input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:.65rem .9rem;outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select option{background:var(--surface2);}
+.form-group{margin-bottom:1rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:.65rem 1.25rem;border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#0f0f0f;}
+.btn-primary:hover{background:var(--accent-dim);}
+.btn-full{width:100%;}
+.btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border);}
+.btn-outline:hover{border-color:var(--border2);background:var(--surface2);}
+.btn-ghost{background:transparent;color:var(--text2);border:0.5px solid var(--border);}
+.btn-ghost:hover{color:var(--text);background:var(--surface2);}
+.btn-danger{background:transparent;color:var(--red);border:0.5px solid var(--red);}
+.btn-danger:hover{background:var(--red-bg);}
+.btn-success{background:transparent;color:var(--green);border:0.5px solid var(--green);}
+.btn-success:hover{background:var(--green-bg);}
+.btn-sm{padding:.35rem .75rem;font-size:12px;}
+.btn-xs{padding:.2rem .55rem;font-size:11px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ALERTS */
+.msg-error{background:var(--red-bg);border:0.5px solid var(--red);border-radius:var(--radius-sm);color:var(--red);font-size:13px;padding:.7rem .9rem;margin-bottom:.75rem;display:none;}
+.msg-success{background:var(--green-bg);border:0.5px solid var(--green);border-radius:var(--radius-sm);color:var(--green);font-size:13px;padding:.7rem .9rem;margin-bottom:.75rem;display:none;}
+.notice{background:var(--accent-bg);border:0.5px solid rgba(232,255,74,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:12px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6;}
+
+/* APP */
+#app{display:none;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:54px;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;}
+.topbar-logo span{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:.75rem;}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border:0.5px solid var(--border);border-radius:100px;padding:.3rem .75rem .3rem .35rem;}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#0f0f0f;font-family:'Syne',sans-serif;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;}
+.user-role-badge{font-size:10px;color:var(--text3);}
+
+.nav-tabs{display:flex;gap:.1rem;padding:0 1.5rem;border-bottom:0.5px solid var(--border);background:var(--surface);overflow-x:auto;}
+.nav-tab{padding:.65rem 1rem;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;position:relative;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-badge{position:absolute;top:8px;right:2px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:100px;padding:1px 5px;min-width:16px;text-align:center;}
+
+.content{padding:1.5rem;max-width:1400px;margin:0 auto;}
+.page-section{display:none;}
+.page-section.active{display:block;}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+.page-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:600;}
+.page-desc{font-size:12px;color:var(--text2);margin-top:.2rem;}
+.header-actions{display:flex;gap:.5rem;flex-wrap:wrap;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem;}
+.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.4rem;}
+.stat-value{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:.2rem;}
+
+/* CARD */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:1.25rem;overflow:hidden;}
+.card-header{padding:1rem 1.25rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;}
+.card-body{padding:1.25rem;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);font-weight:500;padding:.65rem 1rem;text-align:left;border-bottom:0.5px solid var(--border);white-space:nowrap;}
+td{padding:.7rem 1rem;font-size:12px;color:var(--text);border-bottom:0.5px solid var(--border);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+.actions-cell{display:flex;gap:.4rem;flex-wrap:wrap;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:100px;font-size:11px;font-weight:500;}
+.badge-pending{background:var(--amber-bg);color:var(--amber);border:0.5px solid rgba(251,191,36,.3);}
+.badge-approved{background:var(--green-bg);color:var(--green);border:0.5px solid rgba(74,222,128,.3);}
+.badge-rejected{background:var(--red-bg);color:var(--red);border:0.5px solid rgba(248,113,113,.3);}
+.badge-admin{background:var(--accent-bg);color:var(--accent);border:0.5px solid rgba(232,255,74,.3);}
+.badge-colab{background:var(--purple-bg);color:var(--purple);border:0.5px solid rgba(167,139,250,.3);}
+.badge-driver{background:var(--blue-bg);color:var(--blue);border:0.5px solid rgba(96,165,250,.3);}
+
+/* NIVEL BADGES */
+.nivel-a{background:var(--green-bg);color:var(--green);border:0.5px solid rgba(74,222,128,.3);display:inline-flex;align-items:center;padding:1px 8px;border-radius:100px;font-size:11px;font-weight:700;}
+.nivel-b{background:var(--amber-bg);color:var(--amber);border:0.5px solid rgba(251,191,36,.3);display:inline-flex;align-items:center;padding:1px 8px;border-radius:100px;font-size:11px;font-weight:700;}
+.nivel-c{background:var(--red-bg);color:var(--red);border:0.5px solid rgba(248,113,113,.3);display:inline-flex;align-items:center;padding:1px 8px;border-radius:100px;font-size:11px;font-weight:700;}
+
+/* SCORE BAR */
+.score-bar{display:flex;align-items:center;gap:6px;}
+.score-track{flex:1;height:3px;background:var(--surface3);border-radius:100px;overflow:hidden;max-width:70px;}
+.score-fill{height:100%;border-radius:100px;background:var(--accent);transition:width .4s;}
+.score-num{font-family:'DM Mono',monospace;font-size:12px;min-width:28px;}
+
+/* WEEK GRID */
+.week-nav{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;}
+.week-label{font-family:'DM Mono',monospace;font-size:13px;color:var(--text2);flex:1;text-align:center;}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:1.5rem;}
+@media(max-width:900px){.week-grid{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:520px){.week-grid{grid-template-columns:repeat(2,1fr);}}
+
+.day-col{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.day-col.day-today{border-color:rgba(232,255,74,.4);}
+.day-header{padding:.6rem;text-align:center;border-bottom:0.5px solid var(--border);background:var(--surface2);}
+.day-today .day-header{background:var(--accent-bg);}
+.day-name{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);}
+.day-today .day-name{color:var(--accent);}
+.day-date{font-family:'DM Mono',monospace;font-size:16px;color:var(--text);margin-top:1px;}
+.day-today .day-date{color:var(--accent);}
+.shift-slot{padding:.45rem .55rem;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .12s;}
+.shift-slot:last-child{border-bottom:none;}
+.shift-slot:hover{background:var(--surface2);}
+.shift-slot.selected{background:var(--accent-bg);border-left:2px solid var(--accent);}
+.shift-slot.full{opacity:.45;cursor:not-allowed;}
+.shift-slot.approved{border-left:2px solid var(--green);}
+.shift-slot.pending-req{border-left:2px solid var(--amber);}
+.shift-name{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);}
+.shift-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);margin-top:1px;}
+.occ-bar{height:3px;background:var(--surface3);border-radius:100px;margin-top:4px;overflow:hidden;}
+.occ-fill{height:100%;border-radius:100px;transition:width .3s;}
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1.5rem;}
+.cal-head{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);text-align:center;padding:.4rem 0;}
+.cal-cell{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:.5rem;min-height:65px;cursor:pointer;transition:border-color .15s;}
+.cal-cell:hover{border-color:var(--border2);}
+.cal-cell.today{border-color:rgba(232,255,74,.5);}
+.cal-cell.other-month{opacity:.3;}
+.cal-day-num{font-family:'DM Mono',monospace;font-size:13px;margin-bottom:.3rem;}
+.cal-cell.today .cal-day-num{color:var(--accent);}
+.cal-pip{display:flex;align-items:center;gap:3px;margin-bottom:2px;}
+.cal-pip-bar{flex:1;height:3px;border-radius:100px;overflow:hidden;background:var(--surface3);}
+
+/* UPLOAD */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:var(--accent-bg);}
+.upload-icon{font-size:32px;margin-bottom:.75rem;}
+.upload-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;margin-bottom:.25rem;}
+.upload-sub{font-size:12px;color:var(--text2);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem;padding:1rem;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);}
+.filter-bar select,.filter-bar input{width:auto;flex:1;min-width:140px;padding:.5rem .75rem;font-size:12px;}
+.filter-bar .btn{flex-shrink:0;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:1.75rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;margin-bottom:1.25rem;}
+.modal-close{position:absolute;top:.9rem;right:.9rem;background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:.2rem;}
+.modal-close:hover{color:var(--text);}
+.modal-actions{display:flex;gap:.6rem;margin-top:1.25rem;justify-content:flex-end;}
+
+/* VAGAS GRID */
+.vagas-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.4rem;margin-top:.5rem;}
+.vaga-cell{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .3rem;text-align:center;}
+.vaga-cell-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;}
+.vaga-cell input{width:100%;background:var(--surface3);border:0.5px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;font-weight:500;text-align:center;padding:.3rem .2rem;outline:none;}
+.vaga-cell input:focus{border-color:var(--accent);}
+
+/* MISC */
+.empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:13px;}
+.loading{text-align:center;padding:2rem;color:var(--text3);font-size:13px;font-family:'DM Mono',monospace;}
+.dot-blink::after{content:'...';animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.text-mono{font-family:'DM Mono',monospace;}
+.divider{height:.5px;background:var(--border);margin:1rem 0;}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.75rem;margin-top:1.25rem;}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════ LOGIN SCREEN ══════════════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">Logi<span>Turnos</span></div>
     <p class="login-sub">Sistema de gestão de escalas</p>
-
     <div id="msg-error" class="msg-error"></div>
-    <div id="msg-success" class="msg-success"></div>
-
-    <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" id="login-email" placeholder="seu@email.com" />
-    </div>
-
-    <div class="form-group">
-      <label>Senha</label>
-      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" />
-    </div>
-
-    <button class="btn btn-primary" onclick="doLogin()" id="login-btn">Entrar</button>
-
-    <div style="margin-top:1.5rem; text-align:center;">
-      <span style="font-size:12px; color:var(--text3)">Problemas para acessar? Fale com o administrador.</span>
-    </div>
+    <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"/></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Entrar</button>
+    <p style="margin-top:1.25rem;text-align:center;font-size:11px;color:var(--text3)">Problemas? Fale com o administrador.</p>
   </div>
 </div>
 
-<!-- ══════════════════ APP ══════════════════ -->
+<!-- APP -->
 <div id="app">
-
-  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-logo">Logi<span>Turnos</span></div>
     <div class="topbar-right">
-      <div class="user-info">
-        <div class="user-name" id="topbar-name">—</div>
-        <div class="user-role" id="topbar-role">—</div>
+      <div class="user-chip">
+        <div class="avatar" id="topbar-avatar">?</div>
+        <div><div class="user-name" id="topbar-name">—</div><div class="user-role-badge" id="topbar-role">—</div></div>
       </div>
-      <div class="avatar" id="topbar-avatar">?</div>
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sair</button>
     </div>
   </div>
-
-  <!-- Nav Tabs (dinâmico por role) -->
   <div class="nav-tabs" id="nav-tabs"></div>
-
-  <!-- Content -->
   <div class="content">
 
-    <!-- ── ENTREGADOR: MINHA ESCALA ── -->
+    <!-- ══ ENTREGADOR: SOLICITAR ══ -->
     <div class="page-section" id="sec-driver-schedule">
       <div class="page-header">
-        <div>
-          <div class="page-title">Solicitar Turnos</div>
-          <div class="page-desc">Selecione os dias e turnos que deseja trabalhar esta semana</div>
+        <div><div class="page-title">Solicitar Turnos</div><div class="page-desc">Selecione os turnos que deseja trabalhar</div></div>
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" onclick="changeWeek(-1)">← Anterior</button>
+          <button class="btn btn-outline btn-sm" onclick="changeWeek(1)">Próxima →</button>
+          <button class="btn btn-primary btn-sm" onclick="submitRequests()">Enviar solicitações</button>
         </div>
-        <button class="btn btn-primary" onclick="submitRequests()">Enviar solicitações</button>
       </div>
-      <div class="notice">
-        Clique nos turnos desejados para selecioná-los. Turnos <strong style="color:var(--text)">acinzentados</strong> já estão com vagas esgotadas. Suas solicitações ficam aguardando aprovação do administrador.
-      </div>
-      <div class="week-grid" id="week-grid">
-        <div class="loading"><span class="dot-blink">Carregando</span></div>
-      </div>
+      <div class="notice">Clique nos turnos desejados. Turnos acinzentados estão sem vagas. Suas solicitações aguardam aprovação.</div>
+      <div class="week-nav"><span class="week-label" id="driver-week-label">—</span></div>
+      <div class="week-grid" id="week-grid"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
     </div>
 
-    <!-- ── ENTREGADOR: MINHAS SOLICITAÇÕES ── -->
+    <!-- ══ ENTREGADOR: MINHAS SOLICITAÇÕES ══ -->
     <div class="page-section" id="sec-driver-requests">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Minhas Solicitações</div>
-          <div class="page-desc">Histórico de turnos solicitados e seus status</div>
-        </div>
-      </div>
+      <div class="page-header"><div><div class="page-title">Minhas Solicitações</div><div class="page-desc">Histórico e status</div></div></div>
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Solicitações recentes</span>
+        <div class="card-header"><span class="card-title">Solicitações</span>
+          <select id="filter-req-status" onchange="loadDriverRequests()" style="width:auto;padding:.35rem .6rem;font-size:12px;">
+            <option value="">Todos</option><option value="pendente">Pendentes</option><option value="aprovado">Aprovados</option><option value="recusado">Recusados</option>
+          </select>
         </div>
-        <div id="driver-requests-body">
-          <div class="loading"><span class="dot-blink">Carregando</span></div>
-        </div>
+        <div class="table-wrap" id="driver-requests-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
       </div>
     </div>
 
-    <!-- ── ENTREGADOR: MEU PERFIL ── -->
+    <!-- ══ ENTREGADOR: MEU PERFIL ══ -->
     <div class="page-section" id="sec-driver-profile">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Meu Perfil</div>
-          <div class="page-desc">Seu desempenho e informações cadastrais</div>
-        </div>
-      </div>
+      <div class="page-header"><div><div class="page-title">Meu Perfil</div><div class="page-desc">Desempenho e dados cadastrais</div></div></div>
       <div class="stats-grid" id="driver-stats-grid"></div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Histórico de performance</span></div>
-        <div id="driver-perf-body" class="card-body">
-          <div class="loading"><span class="dot-blink">Carregando</span></div>
-        </div>
+      <div class="card"><div class="card-header"><span class="card-title">Histórico de performance</span></div>
+        <div class="table-wrap" id="driver-perf-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
       </div>
     </div>
 
-    <!-- ── ADMIN: DASHBOARD ── -->
+    <!-- ══ ENTREGADOR: MEUS RELATÓRIOS ══ -->
+    <div class="page-section" id="sec-driver-relatorios">
+      <div class="page-header"><div><div class="page-title">Meu Desempenho</div><div class="page-desc">Análise dos seus indicadores</div></div></div>
+      <div class="filter-bar">
+        <input type="date" id="driver-rel-de" placeholder="De"/>
+        <input type="date" id="driver-rel-ate" placeholder="Até"/>
+        <button class="btn btn-outline btn-sm" onclick="loadDriverRelatorio()">Filtrar</button>
+      </div>
+      <div id="driver-rel-stats" class="stats-grid"></div>
+      <div class="card"><div class="card-header"><span class="card-title">Detalhamento por data</span></div>
+        <div class="table-wrap" id="driver-rel-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN/COLAB: DASHBOARD ══ -->
     <div class="page-section" id="sec-admin-dashboard">
       <div class="page-header">
-        <div>
-          <div class="page-title">Dashboard</div>
-          <div class="page-desc">Visão geral das escalas desta semana</div>
-        </div>
+        <div><div class="page-title">Dashboard</div><div class="page-desc">Visão geral das escalas</div></div>
+        <div class="header-actions"><button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ Exportar CSV</button></div>
       </div>
       <div class="stats-grid" id="admin-stats"></div>
       <div class="card">
         <div class="card-header">
           <span class="card-title">Solicitações pendentes</span>
-          <span id="pending-count" class="badge badge-pending">0</span>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+            <span id="pending-count" class="badge badge-pending">0</span>
+            <button class="btn btn-success btn-sm" id="bulk-approve-btn" onclick="bulkAction('aprovado')" style="display:none">✓ Aprovar selecionados</button>
+            <button class="btn btn-danger btn-sm" id="bulk-reject-btn" onclick="bulkAction('recusado')" style="display:none">✕ Recusar selecionados</button>
+          </div>
         </div>
-        <div id="pending-requests-body">
-          <div class="loading"><span class="dot-blink">Carregando</span></div>
-        </div>
+        <div class="table-wrap" id="pending-requests-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
       </div>
     </div>
 
-    <!-- ── ADMIN: ESCALA DA SEMANA ── -->
+    <!-- ══ ADMIN/COLAB: CALENDÁRIO ══ -->
+    <div class="page-section" id="sec-admin-calendar">
+      <div class="page-header">
+        <div><div class="page-title">Calendário</div><div class="page-desc">Ocupação mensal dos turnos</div></div>
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">← Anterior</button>
+          <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">Próximo →</button>
+        </div>
+      </div>
+      <div class="week-nav"><span class="week-label" id="cal-month-label">—</span></div>
+      <div id="calendar-container"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
+    </div>
+
+    <!-- ══ ADMIN/COLAB: ESCALA SEMANAL ══ -->
     <div class="page-section" id="sec-admin-schedule">
       <div class="page-header">
-        <div>
-          <div class="page-title">Escala da Semana</div>
-          <div class="page-desc">Visualização completa de todos os turnos</div>
+        <div><div class="page-title">Escala da Semana</div><div class="page-desc">Turnos aprovados</div></div>
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" onclick="changeAdminWeek(-1)">← Anterior</button>
+          <button class="btn btn-outline btn-sm" onclick="changeAdminWeek(1)">Próxima →</button>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ CSV</button>
         </div>
       </div>
-      <div class="week-grid" id="admin-week-grid">
-        <div class="loading"><span class="dot-blink">Carregando</span></div>
-      </div>
+      <div class="week-nav"><span class="week-label" id="admin-week-label">—</span></div>
+      <div class="week-grid" id="admin-week-grid"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
     </div>
 
-    <!-- ── ADMIN: ENTREGADORES ── -->
+    <!-- ══ ADMIN/COLAB: ENTREGADORES ══ -->
     <div class="page-section" id="sec-admin-drivers">
       <div class="page-header">
-        <div>
-          <div class="page-title">Entregadores</div>
-          <div class="page-desc">Cadastro e gestão de performance</div>
+        <div><div class="page-title">Entregadores</div><div class="page-desc">Cadastro e gestão</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-driver')">+ Novo entregador</button>
+      </div>
+      <div class="card"><div class="table-wrap" id="drivers-table-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div></div>
+    </div>
+
+    <!-- ══ ADMIN/COLAB: RELATÓRIOS ══ -->
+    <div class="page-section" id="sec-admin-relatorios">
+      <div class="page-header">
+        <div><div class="page-title">Relatórios de Desempenho</div><div class="page-desc">Upload, análise e classificação dos entregadores</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-upload')">↑ Upload de relatório</button>
+      </div>
+      <div class="filter-bar">
+        <input type="date" id="rel-filtro-de" placeholder="De"/>
+        <input type="date" id="rel-filtro-ate" placeholder="Até"/>
+        <select id="rel-filtro-entregador" style="max-width:220px;"><option value="">Todos os entregadores</option></select>
+        <button class="btn btn-outline btn-sm" onclick="loadRelatorioAdmin()">Filtrar</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearRelFiltros()">Limpar</button>
+      </div>
+      <div class="stats-grid" id="rel-stats"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Classificação dos entregadores</span>
+          <div style="display:flex;gap:.5rem;align-items:center;font-size:12px;color:var(--text2);">
+            <span class="nivel-a">A</span> Excelente &nbsp;
+            <span class="nivel-b">B</span> Regular &nbsp;
+            <span class="nivel-c">C</span> Crítico
+          </div>
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-driver')">+ Novo entregador</button>
+        <div class="table-wrap" id="rel-ranking-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
       </div>
       <div class="card">
-        <div id="drivers-table-body">
-          <div class="loading"><span class="dot-blink">Carregando</span></div>
-        </div>
+        <div class="card-header"><span class="card-title">Dados detalhados</span></div>
+        <div class="table-wrap" id="rel-detail-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div>
       </div>
     </div>
 
-    <!-- ── ADMIN: TURNOS ── -->
+    <!-- ══ ADMIN: TURNOS ══ -->
     <div class="page-section" id="sec-admin-shifts">
       <div class="page-header">
-        <div>
-          <div class="page-title">Configurar Turnos</div>
-          <div class="page-desc">Defina os turnos disponíveis para a equipe</div>
-        </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-shift')">+ Novo turno</button>
+        <div><div class="page-title">Configurar Turnos</div><div class="page-desc">Vagas por turno e dia</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-shift')">+ Novo turno</button>
       </div>
-      <div class="card">
-        <div id="shifts-table-body">
-          <div class="loading"><span class="dot-blink">Carregando</span></div>
-        </div>
-      </div>
+      <div class="card"><div class="table-wrap" id="shifts-table-body"><div class="loading"><span class="dot-blink">Carregando</span></div></div></div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /app -->
+  </div>
+</div>
 
-<!-- ══════════════════ MODAIS ══════════════════ -->
+<!-- ══════════ MODAIS ══════════ -->
 
-<!-- Modal: adicionar entregador -->
+<!-- Add Driver -->
 <div class="modal-overlay" id="modal-add-driver">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-add-driver')">✕</button>
     <div class="modal-title">Novo entregador</div>
     <div id="modal-driver-error" class="msg-error"></div>
+    <div class="section-label">Dados pessoais</div>
     <div class="grid-2">
-      <div class="form-group">
-        <label>Nome completo</label>
-        <input type="text" id="new-driver-name" placeholder="João Silva" />
-      </div>
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="new-driver-email" placeholder="joao@email.com" />
-      </div>
+      <div class="form-group"><label>Nome completo</label><input type="text" id="new-driver-name" placeholder="João Silva"/></div>
+      <div class="form-group"><label>ID do Entregador</label><input type="text" id="new-driver-idext" placeholder="Ex: 1762609786554463"/></div>
     </div>
+    <div class="grid-3">
+      <div class="form-group"><label>CPF</label><input type="text" id="new-driver-cpf" placeholder="000.000.000-00"/></div>
+      <div class="form-group"><label>Data de nascimento</label><input type="date" id="new-driver-nascimento"/></div>
+      <div class="form-group"><label>Telefone</label><input type="text" id="new-driver-phone" placeholder="(11) 99999-9999"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="form-group"><label>Modal</label>
+        <select id="new-driver-modal"><option value="Moto">Moto</option><option value="Bicicleta">Bicicleta</option><option value="Outro">Outro</option></select>
+      </div>
+      <div class="form-group"><label>É MEI?</label>
+        <select id="new-driver-mei"><option value="false">Não</option><option value="true">Sim</option></select>
+      </div>
+      <div class="form-group"><label>Score inicial (0–100)</label><input type="number" id="new-driver-score" placeholder="70" min="0" max="100"/></div>
+    </div>
+    <div class="section-label">Acesso ao sistema</div>
     <div class="grid-2">
-      <div class="form-group">
-        <label>Telefone</label>
-        <input type="text" id="new-driver-phone" placeholder="(11) 99999-9999" />
-      </div>
-      <div class="form-group">
-        <label>Score inicial (0–100)</label>
-        <input type="number" id="new-driver-score" placeholder="70" min="0" max="100" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Senha temporária</label>
-      <input type="password" id="new-driver-pass" placeholder="Mínimo 6 caracteres" />
+      <div class="form-group"><label>E-mail</label><input type="email" id="new-driver-email" placeholder="joao@email.com"/></div>
+      <div class="form-group"><label>Senha temporária</label><input type="password" id="new-driver-pass" placeholder="Mínimo 6 caracteres"/></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-driver')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addDriver()" id="btn-add-driver">Cadastrar</button>
+      <button class="btn btn-outline" onclick="addDriver()" id="btn-add-driver">Cadastrar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: adicionar turno -->
+<!-- Edit Driver -->
+<div class="modal-overlay" id="modal-edit-driver">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-edit-driver')">✕</button>
+    <div class="modal-title">Editar entregador</div>
+    <input type="hidden" id="edit-driver-id"/>
+    <div id="modal-edit-driver-error" class="msg-error"></div>
+    <div class="section-label">Dados pessoais</div>
+    <div class="grid-2">
+      <div class="form-group"><label>Nome completo</label><input type="text" id="edit-driver-name"/></div>
+      <div class="form-group"><label>ID do Entregador</label><input type="text" id="edit-driver-idext"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="form-group"><label>CPF</label><input type="text" id="edit-driver-cpf"/></div>
+      <div class="form-group"><label>Data de nascimento</label><input type="date" id="edit-driver-nascimento"/></div>
+      <div class="form-group"><label>Telefone</label><input type="text" id="edit-driver-phone"/></div>
+    </div>
+    <div class="grid-3">
+      <div class="form-group"><label>Modal</label>
+        <select id="edit-driver-modal"><option value="Moto">Moto</option><option value="Bicicleta">Bicicleta</option><option value="Outro">Outro</option></select>
+      </div>
+      <div class="form-group"><label>É MEI?</label>
+        <select id="edit-driver-mei"><option value="false">Não</option><option value="true">Sim</option></select>
+      </div>
+      <div class="form-group"><label>Score (0–100)</label><input type="number" id="edit-driver-score" min="0" max="100"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-driver')">Cancelar</button>
+      <button class="btn btn-outline" onclick="saveEditDriver()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Relatório -->
+<div class="modal-overlay" id="modal-upload">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-upload')">✕</button>
+    <div class="modal-title">Upload de relatório</div>
+    <div id="modal-upload-error" class="msg-error"></div>
+    <div id="modal-upload-success" class="msg-success"></div>
+    <div class="form-group"><label>Data de referência do relatório</label><input type="date" id="upload-data-ref"/></div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Clique ou arraste o arquivo CSV</div>
+      <div class="upload-sub" id="upload-filename">Somente arquivos .csv do relatório de desempenho</div>
+    </div>
+    <input type="file" id="file-input" accept=".csv" style="display:none" onchange="fileSelected(this)"/>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-upload')">Cancelar</button>
+      <button class="btn btn-primary" onclick="uploadRelatorio()" id="btn-upload">Processar e salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Performance -->
+<div class="modal-overlay" id="modal-perf">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-perf')">✕</button>
+    <div class="modal-title">Atualizar performance</div>
+    <input type="hidden" id="perf-driver-id"/>
+    <div id="modal-perf-error" class="msg-error"></div>
+    <div class="form-group"><label>Entregador</label><input type="text" id="perf-driver-name" disabled/></div>
+    <div class="grid-2">
+      <div class="form-group"><label>Entregas no prazo (%)</label><input type="number" id="perf-delivery" min="0" max="100" placeholder="90"/></div>
+      <div class="form-group"><label>Avaliação do cliente (0–10)</label><input type="number" id="perf-rating" min="0" max="10" step="0.1" placeholder="8.5"/></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>Assiduidade (%)</label><input type="number" id="perf-attendance" min="0" max="100" placeholder="95"/></div>
+      <div class="form-group"><label>Mês (AAAA-MM)</label><input type="text" id="perf-month" placeholder="2024-01"/></div>
+    </div>
+    <div class="notice">Score = (entregas × 0,4) + (avaliação × 10 × 0,3) + (assiduidade × 0,3)</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-perf')">Cancelar</button>
+      <button class="btn btn-outline" onclick="savePerformance()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Shift -->
 <div class="modal-overlay" id="modal-add-shift">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-add-shift')">✕</button>
     <div class="modal-title">Novo turno</div>
     <div id="modal-shift-error" class="msg-error"></div>
-    <div class="form-group">
-      <label>Nome do turno</label>
-      <input type="text" id="new-shift-name" placeholder="Ex: Manhã, Tarde, Noite" />
-    </div>
+    <div class="form-group"><label>Nome do turno</label><input type="text" id="new-shift-name" placeholder="Ex: Manhã"/></div>
     <div class="grid-2">
-      <div class="form-group">
-        <label>Horário início</label>
-        <input type="text" id="new-shift-start" placeholder="08:00" />
-      </div>
-      <div class="form-group">
-        <label>Horário fim</label>
-        <input type="text" id="new-shift-end" placeholder="14:00" />
-      </div>
+      <div class="form-group"><label>Horário início</label><input type="text" id="new-shift-start" placeholder="08:00"/></div>
+      <div class="form-group"><label>Horário fim</label><input type="text" id="new-shift-end" placeholder="14:00"/></div>
     </div>
-    <div class="form-group">
-      <label>Vagas por dia</label>
-      <input type="number" id="new-shift-slots" placeholder="5" min="1" />
+    <div class="form-group"><label>Vagas por dia da semana</label>
+      <div class="vagas-grid" id="vagas-grid">
+        <div class="vaga-cell"><div class="vaga-cell-label">Dom</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Seg</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Ter</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Qua</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Qui</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Sex</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+        <div class="vaga-cell"><div class="vaga-cell-label">Sáb</div><input type="number" class="vaga-input" min="0" value="5"/></div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-add-shift')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addShift()">Salvar turno</button>
+      <button class="btn btn-outline" onclick="addShift()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: editar performance -->
-<div class="modal-overlay" id="modal-perf">
+<!-- Edit Vagas -->
+<div class="modal-overlay" id="modal-edit-vagas">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-perf')">✕</button>
-    <div class="modal-title">Atualizar performance</div>
-    <input type="hidden" id="perf-driver-id" />
-    <div id="modal-perf-error" class="msg-error"></div>
-    <div class="form-group">
-      <label>Entregador</label>
-      <input type="text" id="perf-driver-name" disabled />
-    </div>
-    <div class="grid-2">
-      <div class="form-group">
-        <label>Entregas no prazo (%)</label>
-        <input type="number" id="perf-delivery" min="0" max="100" placeholder="90" />
-      </div>
-      <div class="form-group">
-        <label>Avaliação do cliente (0–10)</label>
-        <input type="number" id="perf-rating" min="0" max="10" step="0.1" placeholder="8.5" />
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="form-group">
-        <label>Assiduidade (%)</label>
-        <input type="number" id="perf-attendance" min="0" max="100" placeholder="95" />
-      </div>
-      <div class="form-group">
-        <label>Mês de referência</label>
-        <input type="text" id="perf-month" placeholder="2024-01" />
-      </div>
-    </div>
-    <div class="notice">
-      Score calculado automaticamente:<br>
-      <strong style="color:var(--text)">(entregas × 0,4) + (avaliação × 0,3 × 10) + (assiduidade × 0,3)</strong>
-    </div>
+    <button class="modal-close" onclick="closeModal('modal-edit-vagas')">✕</button>
+    <div class="modal-title" id="edit-vagas-title">Editar vagas</div>
+    <input type="hidden" id="edit-vagas-shift-id"/>
+    <div class="vagas-grid" id="edit-vagas-grid"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-perf')">Cancelar</button>
-      <button class="btn btn-primary" onclick="savePerformance()">Salvar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-edit-vagas')">Cancelar</button>
+      <button class="btn btn-outline" onclick="saveVagas()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: detalhes do turno (admin) -->
+<!-- Shift Detail -->
 <div class="modal-overlay" id="modal-shift-detail">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-shift-detail')">✕</button>
-    <div class="modal-title" id="shift-detail-title">Turno</div>
+    <div class="modal-title" id="shift-detail-title">Detalhe</div>
     <div id="shift-detail-body"></div>
   </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════
-// CONFIGURAÇÃO — SUBSTITUA PELOS SEUS DADOS
+// CONFIGURAÇÃO
 // ══════════════════════════════════════════
-const SUPABASE_URL = 'https://arwdncolohsekziznbfh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFyd2RuY29sb2hzZWt6aXpuYmZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0OTQ5MzQsImV4cCI6MjA5NTA3MDkzNH0.WzuF0xstHHK5ap1mnV-PQatJEXePOJyQsGNaYVdb69s';
+const SUPABASE_URL = 'COLE_SUA_SUPABASE_URL_AQUI';
+const SUPABASE_KEY = 'COLE_SUA_ANON_KEY_AQUI';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ──────────────────────────────────────────
-// ESTADO GLOBAL
-// ──────────────────────────────────────────
-let currentUser = null;
-let currentProfile = null;
-let allShifts = [];
-let selectedSlots = new Set();
+// ── ESTADO ──────────────────────────────
+let currentUser=null, currentProfile=null;
+let allShifts=[], vagasMap={};
+let selectedSlots=new Set(), selectedRequests=new Set();
+let driverWeekOffset=0, adminWeekOffset=0;
+let calYear, calMonth;
+let uploadedFile=null;
 
-const DAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-const DAY_FULL = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const DAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS_FULL=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-// ──────────────────────────────────────────
-// INICIALIZAÇÃO
-// ──────────────────────────────────────────
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadApp();
+// ── CLASSIFICAÇÃO ────────────────────────
+function nivelTempoOnline(pct) {
+  if(pct===null||pct===undefined) return 'C';
+  if(pct>=90) return 'A';
+  if(pct>=85) return 'B';
+  return 'C';
+}
+function nivelAceitacao(pct) {
+  if(pct===null||pct===undefined) return 'C';
+  if(pct>=80) return 'A';
+  if(pct>=75) return 'B';
+  return 'C';
+}
+function nivelGeral(nTO, nAc) {
+  const pts = {A:3,B:2,C:1};
+  const total = pts[nTO]+pts[nAc];
+  if(total>=6) return 'A';
+  if(total>=4) return 'B';
+  return 'C';
+}
+function nivelBadge(n) {
+  if(n==='A') return `<span class="nivel-a">A</span>`;
+  if(n==='B') return `<span class="nivel-b">B</span>`;
+  return `<span class="nivel-c">C</span>`;
+}
+
+// ── CSV PARSER ───────────────────────────
+function parsePct(str) {
+  if(!str||str.trim()==='') return null;
+  return parseFloat(str.replace('%','').replace(',','.').trim());
+}
+function parseNum(str) {
+  if(!str||str.trim()==='') return null;
+  return parseFloat(str.replace(',','.').trim());
+}
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l=>l.trim());
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = splitCSVLine(lines[i]);
+    if(cols.length<5) continue;
+    const pTO = parsePct(cols[4]);
+    const pAc = parsePct(cols[7]);
+    const nTO = nivelTempoOnline(pTO);
+    const nAc = nivelAceitacao(pAc);
+    rows.push({
+      id_entregador: cols[0]?.trim()||null,
+      nome_completo: cols[1]?.trim()||null,
+      data: cols[2]?.trim()?.split(' ')[0]||null,
+      rank_entregador: parseNum(cols[3]),
+      pct_tempo_online: pTO,
+      atribuidas: parseInt(cols[5])||0,
+      aceitas: parseInt(cols[6])||0,
+      pct_aceitacao: pAc,
+      recusadas_total: parseInt(cols[8])||0,
+      recusadas_entregadores: parseInt(cols[9])||0,
+      pct_recusas_entregador: parsePct(cols[10]),
+      recusadas_aut: parseInt(cols[11])||0,
+      pct_recusas_aut: parsePct(cols[12]),
+      canceladas: parseInt(cols[13])||0,
+      pct_cancelamento: parsePct(cols[14]),
+      entregues: parseInt(cols[15])||0,
+      pct_entregues: parsePct(cols[16]),
+      pct_absenteismo: parsePct(cols[17]),
+      score_performance: parsePct(cols[18]),
+      classificacao_original: cols[19]?.trim()||null,
+      entregas_por_hora: parseNum(cols[20]),
+      entregas_por_turno: parseNum(cols[21]),
+      qtd_turnos_contratados: parseInt(cols[22])||null,
+      qtd_turnos_off: parseInt(cols[23])||null,
+      qtd_turnos_to_zerado: parseInt(cols[24])||null,
+      nivel_tempo_online: nTO,
+      nivel_aceitacao: nAc,
+      nivel_geral: nivelGeral(nTO,nAc),
+    });
   }
+  return rows;
+}
+function splitCSVLine(line) {
+  const result=[]; let cur=''; let inQ=false;
+  for(let i=0;i<line.length;i++){
+    if(line[i]==='"'){inQ=!inQ;}
+    else if(line[i]===','&&!inQ){result.push(cur);cur='';}
+    else cur+=line[i];
+  }
+  result.push(cur);
+  return result;
+}
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN') {
-      currentUser = session.user;
-      await loadApp();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      currentProfile = null;
-      showLogin();
-    }
+// ── INIT ────────────────────────────────
+async function init() {
+  const { data:{session} }=await sb.auth.getSession();
+  if(session){currentUser=session.user;await loadApp();}
+  sb.auth.onAuthStateChange(async(ev,session)=>{
+    if(ev==='SIGNED_IN'){currentUser=session.user;await loadApp();}
+    else if(ev==='SIGNED_OUT'){currentUser=null;currentProfile=null;showLogin();}
   });
 }
-
 async function loadApp() {
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  currentProfile = profile;
-  if (!profile) return;
-
-  document.getElementById('topbar-name').textContent = profile.nome;
-  document.getElementById('topbar-role').textContent = profile.role === 'admin' ? 'Administrador' : 'Entregador';
-  document.getElementById('topbar-avatar').textContent = profile.nome.charAt(0).toUpperCase();
-
+  const {data:profile}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(!profile){await doLogout();return;}
+  currentProfile=profile;
+  document.getElementById('topbar-name').textContent=profile.nome;
+  const roleLabel={admin:'Administrador',colaborador:'Colaborador',entregador:'Entregador'};
+  document.getElementById('topbar-role').textContent=roleLabel[profile.role]||profile.role;
+  document.getElementById('topbar-avatar').textContent=profile.nome.charAt(0).toUpperCase();
+  const now=new Date(); calYear=now.getFullYear(); calMonth=now.getMonth();
   buildNav(profile.role);
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-
-  if (profile.role === 'admin') {
-    showSection('sec-admin-dashboard');
-    loadAdminDashboard();
-  } else {
-    showSection('sec-driver-schedule');
-    loadDriverSchedule();
-  }
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  if(profile.role==='entregador'){showSection('sec-driver-schedule');loadDriverSchedule();}
+  else{showSection('sec-admin-dashboard');loadAdminDashboard();}
 }
 
-// ──────────────────────────────────────────
-// NAV
-// ──────────────────────────────────────────
-function buildNav(role) {
-  const container = document.getElementById('nav-tabs');
-  container.innerHTML = '';
-  const tabs = role === 'admin'
-    ? [
-        { id: 'sec-admin-dashboard', label: 'Dashboard', fn: 'loadAdminDashboard' },
-        { id: 'sec-admin-schedule', label: 'Escala da Semana', fn: 'loadAdminWeekGrid' },
-        { id: 'sec-admin-drivers', label: 'Entregadores', fn: 'loadDriversTable' },
-        { id: 'sec-admin-shifts', label: 'Turnos', fn: 'loadShiftsTable' },
-      ]
-    : [
-        { id: 'sec-driver-schedule', label: 'Solicitar Turnos', fn: 'loadDriverSchedule' },
-        { id: 'sec-driver-requests', label: 'Minhas Solicitações', fn: 'loadDriverRequests' },
-        { id: 'sec-driver-profile', label: 'Meu Perfil', fn: 'loadDriverProfile' },
-      ];
-
-  tabs.forEach(t => {
-    const el = document.createElement('div');
-    el.className = 'nav-tab';
-    el.id = 'tab-' + t.id;
-    el.textContent = t.label;
-    el.onclick = () => { showSection(t.id); window[t.fn](); };
+// ── NAV ─────────────────────────────────
+function buildNav(role){
+  const container=document.getElementById('nav-tabs'); container.innerHTML='';
+  let tabs=[];
+  if(role==='admin'||role==='colaborador'){
+    tabs=[
+      {id:'sec-admin-dashboard',label:'Dashboard',fn:'loadAdminDashboard'},
+      {id:'sec-admin-calendar',label:'Calendário',fn:'loadCalendar'},
+      {id:'sec-admin-schedule',label:'Escala Semanal',fn:'loadAdminWeekGrid'},
+      {id:'sec-admin-drivers',label:'Entregadores',fn:'loadDriversTable'},
+      {id:'sec-admin-relatorios',label:'Relatórios',fn:'loadRelatorioAdmin'},
+    ];
+    if(role==='admin') tabs.push({id:'sec-admin-shifts',label:'Turnos',fn:'loadShiftsTable'});
+  } else {
+    tabs=[
+      {id:'sec-driver-schedule',label:'Solicitar Turnos',fn:'loadDriverSchedule'},
+      {id:'sec-driver-requests',label:'Minhas Solicitações',fn:'loadDriverRequests'},
+      {id:'sec-driver-relatorios',label:'Meu Desempenho',fn:'loadDriverRelatorio'},
+      {id:'sec-driver-profile',label:'Meu Perfil',fn:'loadDriverProfile'},
+    ];
+  }
+  tabs.forEach(t=>{
+    const el=document.createElement('div');
+    el.className='nav-tab'; el.id='tab-'+t.id; el.textContent=t.label;
+    el.onclick=()=>{showSection(t.id);window[t.fn]();};
     container.appendChild(el);
   });
 }
-
-function showSection(id) {
-  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+function showSection(id){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById(id)?.classList.add('active');
-  document.getElementById('tab-' + id)?.classList.add('active');
+  document.getElementById('tab-'+id)?.classList.add('active');
 }
 
-// ──────────────────────────────────────────
-// AUTH
-// ──────────────────────────────────────────
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const btn = document.getElementById('login-btn');
-  hideMessages();
-  if (!email || !pass) { showError('Preencha e-mail e senha.'); return; }
-  btn.textContent = 'Entrando...';
-  btn.disabled = true;
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) { showError('E-mail ou senha incorretos.'); btn.textContent = 'Entrar'; btn.disabled = false; }
+// ── AUTH ────────────────────────────────
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const btn=document.getElementById('login-btn');
+  document.getElementById('msg-error').style.display='none';
+  if(!email||!pass){showErr('Preencha e-mail e senha.','msg-error');return;}
+  btn.textContent='Entrando...'; btn.disabled=true;
+  const {error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){showErr('E-mail ou senha incorretos.','msg-error');btn.textContent='Entrar';btn.disabled=false;}
+}
+async function doLogout(){await sb.auth.signOut();}
+function showLogin(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-btn').textContent='Entrar';
+  document.getElementById('login-btn').disabled=false;
 }
 
-async function doLogout() {
-  await sb.auth.signOut();
-}
-
-function showLogin() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-btn').textContent = 'Entrar';
-  document.getElementById('login-btn').disabled = false;
-}
-
-// ──────────────────────────────────────────
-// HELPERS UI
-// ──────────────────────────────────────────
-function showError(msg, elId = 'msg-error') {
-  const el = document.getElementById(elId);
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-
-function showSuccess(msg, elId = 'msg-success') {
-  const el = document.getElementById(elId);
-  if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
-}
-
-function hideMessages() {
-  document.querySelectorAll('.msg-error, .msg-success').forEach(e => e.style.display = 'none');
-}
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); hideMessages(); }
-
-function scoreBadgeColor(score) {
-  if (score >= 80) return 'var(--green)';
-  if (score >= 60) return 'var(--amber)';
-  return 'var(--red)';
-}
-
-function statusBadge(status) {
-  if (status === 'aprovado') return '<span class="badge badge-approved">✓ Aprovado</span>';
-  if (status === 'recusado') return '<span class="badge badge-rejected">✕ Recusado</span>';
+// ── UI HELPERS ───────────────────────────
+function showErr(msg,id='msg-error'){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.display='block';}}
+function showOk(msg,id='msg-success'){const el=document.getElementById(id);if(el){el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.querySelectorAll('#'+id+' .msg-error').forEach(e=>e.style.display='none');}
+function scoreColor(s){return s>=80?'var(--green)':s>=60?'var(--amber)':'var(--red)';}
+function statusBadge(s){
+  if(s==='aprovado') return '<span class="badge badge-approved">✓ Aprovado</span>';
+  if(s==='recusado') return '<span class="badge badge-rejected">✕ Recusado</span>';
   return '<span class="badge badge-pending">⏳ Pendente</span>';
 }
+function occColor(pct){return pct>=1?'var(--green)':pct>=.6?'var(--amber)':'var(--blue)';}
+function pctFmt(v){return v===null||v===undefined?'—':v.toFixed(1)+'%';}
+function getWeekStart(offset=0){const d=new Date();d.setDate(d.getDate()-d.getDay()+offset*7);d.setHours(0,0,0,0);return d;}
+function weekLabel(start){const end=new Date(start);end.setDate(start.getDate()+6);return `${start.getDate()}/${start.getMonth()+1} – ${end.getDate()}/${end.getMonth()+1}/${end.getFullYear()}`;}
+function toISO(d){return d.toISOString().split('T')[0];}
 
-function getWeekDates() {
-  const today = new Date();
-  const day = today.getDay();
-  const sunday = new Date(today);
-  sunday.setDate(today.getDate() - day);
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(sunday);
-    d.setDate(sunday.getDate() + i);
-    return d;
-  });
+async function loadVagasMap(){
+  const {data}=await sb.from('turno_vagas').select('*');
+  vagasMap={};(data||[]).forEach(v=>{vagasMap[v.turno_id+'_'+v.dia_semana]=v.vagas;});
 }
 
-// ──────────────────────────────────────────
+// ══════════════════════════════════════════
 // ENTREGADOR — GRADE DE TURNOS
-// ──────────────────────────────────────────
-async function loadDriverSchedule() {
+// ══════════════════════════════════════════
+function changeWeek(dir){driverWeekOffset+=dir;loadDriverSchedule();}
+async function loadDriverSchedule(){
   selectedSlots.clear();
-  const grid = document.getElementById('week-grid');
-  grid.innerHTML = '<div class="loading"><span class="dot-blink">Carregando</span></div>';
-
-  const [{ data: shifts }, { data: myReqs }, { data: allReqs }] = await Promise.all([
+  const grid=document.getElementById('week-grid');
+  grid.innerHTML='<div class="loading"><span class="dot-blink">Carregando</span></div>';
+  const weekStart=getWeekStart(driverWeekOffset);
+  document.getElementById('driver-week-label').textContent=weekLabel(weekStart);
+  await loadVagasMap();
+  const weekISO=toISO(weekStart);
+  const [{data:shifts},{data:myReqs},{data:allApproved}]=await Promise.all([
     sb.from('turnos').select('*').order('horario_inicio'),
-    sb.from('solicitacoes').select('*').eq('usuario_id', currentUser.id),
-    sb.from('solicitacoes').select('*').eq('status', 'aprovado'),
+    sb.from('solicitacoes').select('*').eq('usuario_id',currentUser.id).eq('semana_inicio',weekISO),
+    sb.from('solicitacoes').select('*').eq('status','aprovado').eq('semana_inicio',weekISO),
   ]);
-
-  allShifts = shifts || [];
-  const myReqsMap = {};
-  (myReqs || []).forEach(r => myReqsMap[r.turno_id + '_' + r.dia_semana] = r);
-
-  const aprovadoCount = {};
-  (allReqs || []).forEach(r => {
-    const k = r.turno_id + '_' + r.dia_semana;
-    aprovadoCount[k] = (aprovadoCount[k] || 0) + 1;
-  });
-
-  const weekDates = getWeekDates();
-  const today = new Date().getDay();
-  grid.innerHTML = '';
-
-  weekDates.forEach((date, dayIndex) => {
-    const col = document.createElement('div');
-    col.className = 'day-col' + (dayIndex === today ? ' day-today' : '');
-
-    const header = document.createElement('div');
-    header.className = 'day-header';
-    header.innerHTML = `<div class="day-name">${DAYS[dayIndex]}</div><div class="day-date">${date.getDate()}</div>`;
-    col.appendChild(header);
-
-    if (!allShifts.length) {
-      col.innerHTML += '<div style="padding:0.5rem;font-size:11px;color:var(--text3);text-align:center">Sem turnos</div>';
-    }
-
-    allShifts.forEach(shift => {
-      const key = shift.id + '_' + dayIndex;
-      const myReq = myReqsMap[key];
-      const aprovados = aprovadoCount[key] || 0;
-      const isFull = aprovados >= shift.vagas && !myReq;
-      const isSelected = selectedSlots.has(key);
-      const isApproved = myReq?.status === 'aprovado';
-      const isPending = myReq?.status === 'pendente';
-
-      const slot = document.createElement('div');
-      slot.className = 'shift-slot' + (isSelected ? ' selected' : '') + (isFull && !myReq ? ' full' : '');
-
-      let statusIndicator = '';
-      if (isApproved) statusIndicator = '<span style="font-size:10px;color:var(--green)">✓ Aprovado</span>';
-      else if (isPending) statusIndicator = '<span style="font-size:10px;color:var(--amber)">⏳ Aguardando</span>';
-
-      slot.innerHTML = `
-        <div class="shift-name">${shift.nome}</div>
-        <div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
-        <div class="shift-count">${aprovados}/${shift.vagas} vagas</div>
-        ${statusIndicator}
-      `;
-
-      if (!isFull && !myReq) {
-        slot.onclick = () => {
-          if (selectedSlots.has(key)) { selectedSlots.delete(key); slot.classList.remove('selected'); }
-          else { selectedSlots.add(key); slot.classList.add('selected'); }
-        };
-      }
-
+  allShifts=shifts||[];
+  const myMap={};(myReqs||[]).forEach(r=>myMap[r.turno_id+'_'+r.dia_semana]=r);
+  const approvedCount={};(allApproved||[]).forEach(r=>{const k=r.turno_id+'_'+r.dia_semana;approvedCount[k]=(approvedCount[k]||0)+1;});
+  grid.innerHTML='';
+  for(let di=0;di<7;di++){
+    const date=new Date(weekStart); date.setDate(weekStart.getDate()+di);
+    const isToday=date.toDateString()===new Date().toDateString();
+    const col=document.createElement('div');
+    col.className='day-col'+(isToday?' day-today':'');
+    col.innerHTML=`<div class="day-header"><div class="day-name">${DAYS[di]}</div><div class="day-date">${date.getDate()}</div></div>`;
+    allShifts.forEach(shift=>{
+      const key=shift.id+'_'+di;
+      const vagas=vagasMap[shift.id+'_'+di]??shift.vagas??5;
+      const approved=approvedCount[key]||0;
+      const myReq=myMap[key];
+      const isFull=approved>=vagas&&!myReq;
+      const isApproved=myReq?.status==='aprovado';
+      const isPending=myReq?.status==='pendente';
+      const isSelected=selectedSlots.has(key);
+      const pct=vagas>0?approved/vagas:0;
+      const slot=document.createElement('div');
+      let cls='shift-slot';
+      if(isSelected)cls+=' selected';
+      if(isFull&&!myReq)cls+=' full';
+      if(isApproved)cls+=' approved';
+      else if(isPending)cls+=' pending-req';
+      slot.className=cls;
+      slot.innerHTML=`<div class="shift-name">${shift.nome}</div><div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
+        <div style="font-size:10px;color:var(--text3)">${approved}/${vagas}</div>
+        <div class="occ-bar"><div class="occ-fill" style="width:${Math.min(pct,1)*100}%;background:${occColor(pct)}"></div></div>
+        ${isApproved?'<div style="font-size:10px;color:var(--green)">✓ Aprovado</div>':isPending?'<div style="font-size:10px;color:var(--amber)">⏳ Aguardando</div>':''}`;
+      if(!isFull&&!myReq) slot.onclick=()=>{if(selectedSlots.has(key)){selectedSlots.delete(key);slot.classList.remove('selected');}else{selectedSlots.add(key);slot.classList.add('selected');}};
       col.appendChild(slot);
     });
-
     grid.appendChild(col);
-  });
+  }
+}
+async function submitRequests(){
+  if(!selectedSlots.size){alert('Selecione pelo menos um turno.');return;}
+  const weekISO=toISO(getWeekStart(driverWeekOffset));
+  const rows=Array.from(selectedSlots).map(key=>{const[turno_id,dia]=key.split('_');return{usuario_id:currentUser.id,turno_id,dia_semana:parseInt(dia),semana_inicio:weekISO,status:'pendente'};});
+  const{error}=await sb.from('solicitacoes').upsert(rows,{onConflict:'usuario_id,turno_id,dia_semana,semana_inicio'});
+  if(error){alert('Erro: '+error.message);return;}
+  alert(`${rows.length} solicitação(ões) enviada(s)!`);
+  selectedSlots.clear(); loadDriverSchedule(); updatePendingBadge();
 }
 
-async function submitRequests() {
-  if (!selectedSlots.size) { alert('Selecione pelo menos um turno.'); return; }
-
-  const rows = Array.from(selectedSlots).map(key => {
-    const [turno_id, dia_semana] = key.split('_');
-    return { usuario_id: currentUser.id, turno_id, dia_semana: parseInt(dia_semana), status: 'pendente' };
-  });
-
-  const { error } = await sb.from('solicitacoes').upsert(rows, { onConflict: 'usuario_id,turno_id,dia_semana' });
-  if (error) { alert('Erro ao enviar: ' + error.message); return; }
-
-  alert(`${rows.length} solicitação(ões) enviada(s)! Aguarde a aprovação do administrador.`);
-  selectedSlots.clear();
-  loadDriverSchedule();
+// ── ENTREGADOR: SOLICITAÇÕES ─────────────
+async function loadDriverRequests(){
+  const filter=document.getElementById('filter-req-status').value;
+  const body=document.getElementById('driver-requests-body');
+  let q=sb.from('solicitacoes').select('*,turno:turno_id(*)').eq('usuario_id',currentUser.id).order('created_at',{ascending:false});
+  if(filter)q=q.eq('status',filter);
+  const{data}=await q;
+  if(!data?.length){body.innerHTML='<div class="empty">Nenhuma solicitação encontrada.</div>';return;}
+  body.innerHTML=`<table><thead><tr><th>Turno</th><th>Horário</th><th>Dia</th><th>Semana</th><th>Status</th></tr></thead><tbody>
+  ${data.map(r=>`<tr><td>${r.turno?.nome||'—'}</td><td class="text-mono">${r.turno?.horario_inicio?.slice(0,5)||'—'}–${r.turno?.horario_fim?.slice(0,5)||'—'}</td><td>${DAYS_FULL[r.dia_semana]||'—'}</td><td class="text-mono" style="color:var(--text2)">${r.semana_inicio||'—'}</td><td>${statusBadge(r.status)}</td></tr>`).join('')}</tbody></table>`;
 }
 
-// ──────────────────────────────────────────
-// ENTREGADOR — MINHAS SOLICITAÇÕES
-// ──────────────────────────────────────────
-async function loadDriverRequests() {
-  const body = document.getElementById('driver-requests-body');
-  const { data } = await sb.from('solicitacoes')
-    .select('*, turno:turno_id(*)')
-    .eq('usuario_id', currentUser.id)
-    .order('created_at', { ascending: false });
-
-  if (!data?.length) { body.innerHTML = '<div class="empty">Você ainda não fez nenhuma solicitação.</div>'; return; }
-
-  body.innerHTML = `<table>
-    <thead><tr><th>Turno</th><th>Horário</th><th>Dia</th><th>Status</th><th>Data</th></tr></thead>
-    <tbody>
-    ${data.map(r => `<tr>
-      <td>${r.turno?.nome || '—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px">${r.turno?.horario_inicio?.slice(0,5) || '—'}–${r.turno?.horario_fim?.slice(0,5) || '—'}</td>
-      <td>${DAY_FULL[r.dia_semana] || '—'}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td style="color:var(--text3);font-size:12px">${new Date(r.created_at).toLocaleDateString('pt-BR')}</td>
-    </tr>`).join('')}
-    </tbody></table>`;
-}
-
-// ──────────────────────────────────────────
-// ENTREGADOR — MEU PERFIL
-// ──────────────────────────────────────────
-async function loadDriverProfile() {
-  const { data: perfs } = await sb.from('performance')
-    .select('*')
-    .eq('usuario_id', currentUser.id)
-    .order('mes', { ascending: false });
-
-  const { data: reqs } = await sb.from('solicitacoes')
-    .select('*')
-    .eq('usuario_id', currentUser.id);
-
-  const aprovados = (reqs || []).filter(r => r.status === 'aprovado').length;
-  const total = (reqs || []).length;
-
-  const statsGrid = document.getElementById('driver-stats-grid');
-  statsGrid.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Score atual</div>
-      <div class="stat-value" style="color:${scoreBadgeColor(currentProfile.score || 0)}">${Math.round(currentProfile.score || 0)}</div>
-      <div class="stat-sub">de 100 pontos</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Turnos aprovados</div>
-      <div class="stat-value">${aprovados}</div>
-      <div class="stat-sub">de ${total} solicitados</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Registros de perf.</div>
-      <div class="stat-value">${(perfs || []).length}</div>
-      <div class="stat-sub">meses avaliados</div>
-    </div>
+// ── ENTREGADOR: PERFIL ────────────────────
+async function loadDriverProfile(){
+  const[{data:perfs},{data:reqs}]=await Promise.all([
+    sb.from('performance').select('*').eq('usuario_id',currentUser.id).order('mes',{ascending:false}),
+    sb.from('solicitacoes').select('*').eq('usuario_id',currentUser.id),
+  ]);
+  const aprovados=(reqs||[]).filter(r=>r.status==='aprovado').length;
+  document.getElementById('driver-stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Score atual</div><div class="stat-value" style="color:${scoreColor(currentProfile.score||0)}">${Math.round(currentProfile.score||0)}</div><div class="stat-sub">de 100 pts</div></div>
+    <div class="stat-card"><div class="stat-label">Turnos aprovados</div><div class="stat-value">${aprovados}</div><div class="stat-sub">de ${(reqs||[]).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Modal</div><div class="stat-value" style="font-size:14px">${currentProfile.modal||'—'}</div><div class="stat-sub">${currentProfile.is_mei?'MEI':'Não MEI'}</div></div>
   `;
-
-  const body = document.getElementById('driver-perf-body');
-  if (!perfs?.length) { body.innerHTML = '<div class="empty">Nenhum registro de performance ainda.</div>'; return; }
-
-  body.innerHTML = `<table>
-    <thead><tr><th>Mês</th><th>Entregas no prazo</th><th>Avaliação cliente</th><th>Assiduidade</th><th>Score</th></tr></thead>
-    <tbody>
-    ${perfs.map(p => `<tr>
-      <td style="font-family:'DM Mono',monospace">${p.mes}</td>
-      <td>${p.entregas_prazo}%</td>
-      <td>${p.avaliacao_cliente}/10</td>
-      <td>${p.assiduidade}%</td>
-      <td>
-        <div class="score-bar">
-          <div class="score-track"><div class="score-fill" style="width:${p.score}%"></div></div>
-          <span class="score-num" style="color:${scoreBadgeColor(p.score)}">${Math.round(p.score)}</span>
-        </div>
-      </td>
-    </tr>`).join('')}
-    </tbody></table>`;
+  const body=document.getElementById('driver-perf-body');
+  if(!perfs?.length){body.innerHTML='<div class="empty">Nenhum registro ainda.</div>';return;}
+  body.innerHTML=`<table><thead><tr><th>Mês</th><th>Entregas (%)</th><th>Avaliação</th><th>Assiduidade</th><th>Score</th></tr></thead><tbody>
+  ${perfs.map(p=>`<tr><td class="text-mono">${p.mes}</td><td>${p.entregas_prazo}%</td><td>${p.avaliacao_cliente}/10</td><td>${p.assiduidade}%</td>
+    <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${p.score}%"></div></div><span class="score-num" style="color:${scoreColor(p.score)}">${Math.round(p.score)}</span></div></td>
+  </tr>`).join('')}</tbody></table>`;
 }
 
-// ──────────────────────────────────────────
-// ADMIN — DASHBOARD
-// ──────────────────────────────────────────
-async function loadAdminDashboard() {
-  const [
-    { data: drivers },
-    { data: pending },
-    { data: approved },
-    { data: shifts }
-  ] = await Promise.all([
-    sb.from('profiles').select('*').eq('role', 'entregador'),
-    sb.from('solicitacoes').select('*').eq('status', 'pendente'),
-    sb.from('solicitacoes').select('*').eq('status', 'aprovado'),
+// ── ENTREGADOR: RELATÓRIO PESSOAL ─────────
+async function loadDriverRelatorio(){
+  const de=document.getElementById('driver-rel-de').value;
+  const ate=document.getElementById('driver-rel-ate').value;
+  const body=document.getElementById('driver-rel-body');
+  const statsEl=document.getElementById('driver-rel-stats');
+  const idEnt=currentProfile.id_entregador;
+  if(!idEnt){body.innerHTML='<div class="empty">Seu perfil não possui ID de entregador vinculado. Fale com o administrador.</div>';return;}
+  let q=sb.from('relatorio_linhas').select('*').eq('id_entregador',idEnt).order('data',{ascending:false});
+  if(de)q=q.gte('data',de);
+  if(ate)q=q.lte('data',ate);
+  const{data}=await q;
+  if(!data?.length){statsEl.innerHTML='';body.innerHTML='<div class="empty">Nenhum dado encontrado para o período.</div>';return;}
+  const avgTO=data.filter(r=>r.pct_tempo_online!==null).reduce((s,r)=>s+r.pct_tempo_online,0)/(data.filter(r=>r.pct_tempo_online!==null).length||1);
+  const avgAc=data.filter(r=>r.pct_aceitacao!==null).reduce((s,r)=>s+r.pct_aceitacao,0)/(data.filter(r=>r.pct_aceitacao!==null).length||1);
+  const avgRec=data.filter(r=>r.pct_recusas_entregador!==null).reduce((s,r)=>s+r.pct_recusas_entregador,0)/(data.filter(r=>r.pct_recusas_entregador!==null).length||1);
+  const nTO=nivelTempoOnline(avgTO), nAc=nivelAceitacao(avgAc), nG=nivelGeral(nTO,nAc);
+  statsEl.innerHTML=`
+    <div class="stat-card"><div class="stat-label">Tempo online médio</div><div class="stat-value">${pctFmt(avgTO)}</div><div class="stat-sub">${nivelBadge(nTO)}</div></div>
+    <div class="stat-card"><div class="stat-label">Aceitação média</div><div class="stat-value">${pctFmt(avgAc)}</div><div class="stat-sub">${nivelBadge(nAc)}</div></div>
+    <div class="stat-card"><div class="stat-label">Recusadas médio</div><div class="stat-value">${pctFmt(avgRec)}</div></div>
+    <div class="stat-card"><div class="stat-label">Classificação geral</div><div class="stat-value">${nivelBadge(nG)}</div></div>
+  `;
+  body.innerHTML=`<table><thead><tr><th>Data</th><th>Tempo Online</th><th>Nível TO</th><th>Aceitação</th><th>Nível Ac</th><th>Recusadas</th><th>Entregues</th><th>Score</th><th>Nível Geral</th></tr></thead><tbody>
+  ${data.map(r=>`<tr>
+    <td class="text-mono">${r.data||'—'}</td>
+    <td>${pctFmt(r.pct_tempo_online)}</td><td>${nivelBadge(r.nivel_tempo_online)}</td>
+    <td>${pctFmt(r.pct_aceitacao)}</td><td>${nivelBadge(r.nivel_aceitacao)}</td>
+    <td>${pctFmt(r.pct_recusas_entregador)}</td>
+    <td>${r.entregues??'—'}</td>
+    <td>${pctFmt(r.score_performance)}</td>
+    <td>${nivelBadge(r.nivel_geral)}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+// ADMIN/COLAB — DASHBOARD
+// ══════════════════════════════════════════
+async function loadAdminDashboard(){
+  selectedRequests.clear();
+  const[{data:drivers},{data:pending},{data:approved},{data:shifts}]=await Promise.all([
+    sb.from('profiles').select('*').eq('role','entregador'),
+    sb.from('solicitacoes').select('*').eq('status','pendente'),
+    sb.from('solicitacoes').select('*').eq('status','aprovado'),
     sb.from('turnos').select('*'),
   ]);
-
-  document.getElementById('admin-stats').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-label">Entregadores ativos</div>
-      <div class="stat-value">${(drivers||[]).length}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Solicitações pendentes</div>
-      <div class="stat-value" style="color:var(--amber)">${(pending||[]).length}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Turnos aprovados (semana)</div>
-      <div class="stat-value" style="color:var(--green)">${(approved||[]).length}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Turnos configurados</div>
-      <div class="stat-value">${(shifts||[]).length}</div>
-    </div>
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Entregadores</div><div class="stat-value">${(drivers||[]).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Pendentes</div><div class="stat-value" style="color:var(--amber)">${(pending||[]).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Aprovados</div><div class="stat-value" style="color:var(--green)">${(approved||[]).length}</div></div>
+    <div class="stat-card"><div class="stat-label">Turnos</div><div class="stat-value">${(shifts||[]).length}</div></div>
   `;
-
-  document.getElementById('pending-count').textContent = (pending||[]).length;
-
-  if (!(pending||[]).length) {
-    document.getElementById('pending-requests-body').innerHTML = '<div class="empty">Nenhuma solicitação pendente 🎉</div>';
-    return;
-  }
-
-  const ids = [...new Set(pending.map(r => r.usuario_id))];
-  const { data: profs } = await sb.from('profiles').select('*').in('id', ids);
-  const profMap = {};
-  (profs||[]).forEach(p => profMap[p.id] = p);
-
-  const shiftIds = [...new Set(pending.map(r => r.turno_id))];
-  const { data: shiftData } = await sb.from('turnos').select('*').in('id', shiftIds);
-  const shiftMap = {};
-  (shiftData||[]).forEach(s => shiftMap[s.id] = s);
-
-  const pendingSorted = [...pending].sort((a, b) => {
-    const sa = profMap[b.usuario_id]?.score || 0;
-    const sb2 = profMap[a.usuario_id]?.score || 0;
-    return sa - sb2;
-  });
-
-  document.getElementById('pending-requests-body').innerHTML = `<table>
-    <thead><tr><th>Entregador</th><th>Score</th><th>Turno</th><th>Dia</th><th>Ações</th></tr></thead>
-    <tbody>
-    ${pendingSorted.map(r => {
-      const prof = profMap[r.usuario_id] || {};
-      const shift = shiftMap[r.turno_id] || {};
-      return `<tr>
-        <td>${prof.nome || '—'}</td>
-        <td>
-          <div class="score-bar">
-            <div class="score-track"><div class="score-fill" style="width:${prof.score||0}%"></div></div>
-            <span class="score-num" style="color:${scoreBadgeColor(prof.score||0)}">${Math.round(prof.score||0)}</span>
-          </div>
-        </td>
-        <td>${shift.nome || '—'} <span style="color:var(--text3);font-size:12px;font-family:'DM Mono',monospace">${(shift.horario_inicio||'').slice(0,5)}–${(shift.horario_fim||'').slice(0,5)}</span></td>
-        <td>${DAY_FULL[r.dia_semana] || '—'}</td>
-        <td>
-          <div class="actions-cell">
-            <button class="btn btn-success btn-sm" onclick="reviewRequest('${r.id}', 'aprovado')">Aprovar</button>
-            <button class="btn btn-danger btn-sm" onclick="reviewRequest('${r.id}', 'recusado')">Recusar</button>
-          </div>
-        </td>
-      </tr>`;
-    }).join('')}
-    </tbody></table>`;
-}
-
-async function reviewRequest(id, status) {
-  await sb.from('solicitacoes').update({ status }).eq('id', id);
-  loadAdminDashboard();
-}
-
-// ──────────────────────────────────────────
-// ADMIN — ESCALA DA SEMANA
-// ──────────────────────────────────────────
-async function loadAdminWeekGrid() {
-  const grid = document.getElementById('admin-week-grid');
-  grid.innerHTML = '<div class="loading"><span class="dot-blink">Carregando</span></div>';
-
-  const [{ data: shifts }, { data: approved }] = await Promise.all([
-    sb.from('turnos').select('*').order('horario_inicio'),
-    sb.from('solicitacoes').select('*, profile:usuario_id(nome, score)').eq('status', 'aprovado'),
+  document.getElementById('pending-count').textContent=(pending||[]).length;
+  updatePendingBadge();
+  if(!(pending||[]).length){document.getElementById('pending-requests-body').innerHTML='<div class="empty">Nenhuma solicitação pendente 🎉</div>';return;}
+  const profIds=[...new Set(pending.map(r=>r.usuario_id))];
+  const shiftIds=[...new Set(pending.map(r=>r.turno_id))];
+  const[{data:profs},{data:shiftData}]=await Promise.all([
+    sb.from('profiles').select('*').in('id',profIds),
+    sb.from('turnos').select('*').in('id',shiftIds),
   ]);
+  const profMap={},shiftMap={};
+  (profs||[]).forEach(p=>profMap[p.id]=p);
+  (shiftData||[]).forEach(s=>shiftMap[s.id]=s);
+  const sorted=[...pending].sort((a,b)=>(profMap[b.usuario_id]?.score||0)-(profMap[a.usuario_id]?.score||0));
+  document.getElementById('pending-requests-body').innerHTML=`
+    <div style="padding:.5rem 1rem;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:.75rem;">
+      <input type="checkbox" id="check-all" onchange="toggleAllRequests(this.checked)" style="width:16px;height:16px;accent-color:var(--accent)"/>
+      <label for="check-all" style="font-size:12px;color:var(--text2);margin:0;text-transform:none;letter-spacing:0">Selecionar todos</label>
+    </div>
+    <table><thead><tr><th></th><th>Entregador</th><th>Modal</th><th>Score</th><th>Turno</th><th>Dia</th><th>Ação</th></tr></thead><tbody>
+    ${sorted.map(r=>{const prof=profMap[r.usuario_id]||{},shift=shiftMap[r.turno_id]||{};
+      return `<tr>
+        <td><input type="checkbox" class="req-check" data-id="${r.id}" onchange="toggleRequest('${r.id}',this.checked)" style="width:15px;height:15px;accent-color:var(--accent)"/></td>
+        <td style="font-weight:500">${prof.nome||'—'}</td>
+        <td><span class="badge badge-driver">${prof.modal||'—'}</span></td>
+        <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${prof.score||0}%"></div></div><span class="score-num" style="color:${scoreColor(prof.score||0)}">${Math.round(prof.score||0)}</span></div></td>
+        <td>${shift.nome||'—'} <span class="text-mono" style="font-size:11px;color:var(--text2)">${(shift.horario_inicio||'').slice(0,5)}–${(shift.horario_fim||'').slice(0,5)}</span></td>
+        <td>${DAYS_FULL[r.dia_semana]||'—'}</td>
+        <td><div class="actions-cell">
+          <button class="btn btn-success btn-xs" onclick="reviewRequest('${r.id}','aprovado')">✓</button>
+          <button class="btn btn-danger btn-xs" onclick="reviewRequest('${r.id}','recusado')">✕</button>
+        </div></td>
+      </tr>`;}).join('')}</tbody></table>`;
+}
+function toggleRequest(id,checked){if(checked)selectedRequests.add(id);else selectedRequests.delete(id);const h=selectedRequests.size>0;document.getElementById('bulk-approve-btn').style.display=h?'':'none';document.getElementById('bulk-reject-btn').style.display=h?'':'none';}
+function toggleAllRequests(checked){document.querySelectorAll('.req-check').forEach(cb=>{cb.checked=checked;toggleRequest(cb.dataset.id,checked);});}
+async function reviewRequest(id,status){await sb.from('solicitacoes').update({status}).eq('id',id);loadAdminDashboard();}
+async function bulkAction(status){if(!selectedRequests.size)return;if(!confirm(`${status==='aprovado'?'Aprovar':'Recusar'} ${selectedRequests.size} solicitação(ões)?`))return;await sb.from('solicitacoes').update({status}).in('id',[...selectedRequests]);selectedRequests.clear();loadAdminDashboard();}
+async function updatePendingBadge(){const{count}=await sb.from('solicitacoes').select('*',{count:'exact',head:true}).eq('status','pendente');const tab=document.getElementById('tab-sec-admin-dashboard');if(!tab)return;let badge=tab.querySelector('.nav-badge');if(count>0){if(!badge){badge=document.createElement('span');badge.className='nav-badge';tab.appendChild(badge);}badge.textContent=count;}else if(badge)badge.remove();}
 
-  const weekDates = getWeekDates();
-  const today = new Date().getDay();
-  grid.innerHTML = '';
+// ── CALENDÁRIO ───────────────────────────
+function changeMonth(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}else if(calMonth<0){calMonth=11;calYear--;}loadCalendar();}
+async function loadCalendar(){
+  document.getElementById('cal-month-label').textContent=`${MONTHS[calMonth]} ${calYear}`;
+  const container=document.getElementById('calendar-container');
+  container.innerHTML='<div class="loading"><span class="dot-blink">Carregando</span></div>';
+  await loadVagasMap();
+  const[{data:shifts},{data:approved}]=await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*,profile:usuario_id(nome,score)').eq('status','aprovado'),
+  ]);
+  const firstDay=new Date(calYear,calMonth,1);
+  const lastDay=new Date(calYear,calMonth+1,0);
+  const today=new Date();
+  const approvedByDate={};
+  (approved||[]).forEach(r=>{const d=new Date(r.semana_inicio);d.setDate(d.getDate()+r.dia_semana);const ds=toISO(d);const k=ds+'_'+r.turno_id;if(!approvedByDate[k])approvedByDate[k]={count:0,drivers:[]};approvedByDate[k].count++;approvedByDate[k].drivers.push(r.profile);});
+  let html='<div class="cal-grid">';
+  DAYS.forEach(d=>html+=`<div class="cal-head">${d}</div>`);
+  for(let i=0;i<firstDay.getDay();i++)html+=`<div class="cal-cell other-month"></div>`;
+  for(let day=1;day<=lastDay.getDate();day++){
+    const date=new Date(calYear,calMonth,day);
+    const dateStr=toISO(date); const dow=date.getDay();
+    const isToday=date.toDateString()===today.toDateString();
+    let pips='';
+    (shifts||[]).forEach(shift=>{
+      const k=dateStr+'_'+shift.id;
+      const vagas=vagasMap[shift.id+'_'+dow]??shift.vagas??5;
+      const count=(approvedByDate[k]?.count)||0;
+      const pct=vagas>0?count/vagas:0;
+      pips+=`<div class="cal-pip"><span style="font-size:8px;color:var(--text3);min-width:18px">${shift.nome.slice(0,3)}</span><div class="cal-pip-bar"><div style="height:3px;border-radius:100px;width:${Math.min(pct,1)*100}%;background:${occColor(pct)}"></div></div><span style="font-size:8px;color:var(--text3)">${count}/${vagas}</span></div>`;
+    });
+    html+=`<div class="cal-cell${isToday?' today':''}" onclick="openDayDetail('${dateStr}',${dow},'${date.getDate()}/${date.getMonth()+1}')"><div class="cal-day-num">${day}</div>${pips}</div>`;
+  }
+  const total=firstDay.getDay()+lastDay.getDate();
+  for(let i=0;i<(total%7===0?0:7-total%7);i++)html+=`<div class="cal-cell other-month"></div>`;
+  html+='</div>'; container.innerHTML=html;
+}
+async function openDayDetail(dateStr,dow,label){
+  document.getElementById('shift-detail-title').textContent=`Escala — ${DAYS_FULL[dow]}, ${label}`;
+  const body=document.getElementById('shift-detail-body');
+  body.innerHTML='<div class="loading"><span class="dot-blink">Carregando</span></div>';
+  openModal('modal-shift-detail');
+  await loadVagasMap();
+  const weekStart=new Date(dateStr); weekStart.setDate(weekStart.getDate()-dow);
+  const weekISO=toISO(weekStart);
+  const[{data:shifts},{data:approved}]=await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*,profile:usuario_id(nome,score)').eq('status','aprovado').eq('semana_inicio',weekISO).eq('dia_semana',dow),
+  ]);
+  let html='';
+  (shifts||[]).forEach(shift=>{
+    const vagas=vagasMap[shift.id+'_'+dow]??shift.vagas??5;
+    const drivers=(approved||[]).filter(r=>r.turno_id===shift.id);
+    const pct=vagas>0?drivers.length/vagas:0;
+    html+=`<div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+        <span style="font-weight:500;font-size:13px">${shift.nome} <span class="text-mono" style="font-size:11px;color:var(--text2)">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</span></span>
+        <span style="font-size:11px;color:${occColor(pct)}">${drivers.length}/${vagas}</span>
+      </div>
+      <div class="occ-bar" style="margin-bottom:.5rem"><div class="occ-fill" style="width:${Math.min(pct,1)*100}%;background:${occColor(pct)}"></div></div>
+      ${drivers.length?drivers.map(r=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:.2rem 0"><span>${r.profile?.nome||'—'}</span><span class="score-num" style="color:${scoreColor(r.profile?.score||0)}">${Math.round(r.profile?.score||0)} pts</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3)">Nenhum alocado</div>'}
+    </div>`;
+  });
+  body.innerHTML=html;
+}
 
-  weekDates.forEach((date, dayIndex) => {
-    const col = document.createElement('div');
-    col.className = 'day-col' + (dayIndex === today ? ' day-today' : '');
-
-    const header = document.createElement('div');
-    header.className = 'day-header';
-    header.innerHTML = `<div class="day-name">${DAYS[dayIndex]}</div><div class="day-date">${date.getDate()}</div>`;
-    col.appendChild(header);
-
-    (shifts||[]).forEach(shift => {
-      const slotDrivers = (approved||[]).filter(r => r.turno_id === shift.id && r.dia_semana === dayIndex);
-      const slot = document.createElement('div');
-      slot.className = 'shift-slot';
-      slot.style.cursor = 'pointer';
-      slot.innerHTML = `
-        <div class="shift-name">${shift.nome}</div>
-        <div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
-        <div class="shift-count" style="color:${slotDrivers.length >= shift.vagas ? 'var(--green)' : 'var(--amber)'}">
-          ${slotDrivers.length}/${shift.vagas} alocados
-        </div>
-      `;
-      slot.onclick = () => showShiftDetail(shift, dayIndex, slotDrivers);
+// ── ESCALA SEMANAL ───────────────────────
+function changeAdminWeek(dir){adminWeekOffset+=dir;loadAdminWeekGrid();}
+async function loadAdminWeekGrid(){
+  const grid=document.getElementById('admin-week-grid');
+  grid.innerHTML='<div class="loading"><span class="dot-blink">Carregando</span></div>';
+  const weekStart=getWeekStart(adminWeekOffset);
+  document.getElementById('admin-week-label').textContent=weekLabel(weekStart);
+  const weekISO=toISO(weekStart);
+  await loadVagasMap();
+  const[{data:shifts},{data:approved}]=await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*,profile:usuario_id(nome,score)').eq('status','aprovado').eq('semana_inicio',weekISO),
+  ]);
+  grid.innerHTML='';
+  for(let di=0;di<7;di++){
+    const date=new Date(weekStart); date.setDate(weekStart.getDate()+di);
+    const isToday=date.toDateString()===new Date().toDateString();
+    const col=document.createElement('div');
+    col.className='day-col'+(isToday?' day-today':'');
+    col.innerHTML=`<div class="day-header"><div class="day-name">${DAYS[di]}</div><div class="day-date">${date.getDate()}</div></div>`;
+    (shifts||[]).forEach(shift=>{
+      const vagas=vagasMap[shift.id+'_'+di]??shift.vagas??5;
+      const drivers=(approved||[]).filter(r=>r.turno_id===shift.id&&r.dia_semana===di);
+      const pct=vagas>0?drivers.length/vagas:0;
+      const slot=document.createElement('div'); slot.className='shift-slot'; slot.style.cursor='pointer';
+      slot.innerHTML=`<div class="shift-name">${shift.nome}</div><div class="shift-time">${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}</div>
+        <div style="font-size:10px;color:${occColor(pct)}">${drivers.length}/${vagas}</div>
+        <div class="occ-bar"><div class="occ-fill" style="width:${Math.min(pct,1)*100}%;background:${occColor(pct)}"></div></div>`;
+      slot.onclick=()=>{document.getElementById('shift-detail-title').textContent=`${shift.nome} — ${DAYS_FULL[di]}`;const body=document.getElementById('shift-detail-body');if(!drivers.length){body.innerHTML='<div class="empty">Nenhum alocado.</div>';}else{body.innerHTML=`<table><thead><tr><th>Entregador</th><th>Score</th></tr></thead><tbody>${drivers.map(r=>`<tr><td>${r.profile?.nome||'—'}</td><td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${r.profile?.score||0}%"></div></div><span class="score-num" style="color:${scoreColor(r.profile?.score||0)}">${Math.round(r.profile?.score||0)}</span></div></td></tr>`).join('')}</tbody></table>`;}openModal('modal-shift-detail');};
       col.appendChild(slot);
     });
-
     grid.appendChild(col);
+  }
+}
+
+// ── ENTREGADORES ─────────────────────────
+async function loadDriversTable(){
+  const body=document.getElementById('drivers-table-body');
+  const{data}=await sb.from('profiles').select('*').eq('role','entregador').order('score',{ascending:false});
+  if(!data?.length){body.innerHTML='<div class="empty">Nenhum entregador cadastrado.</div>';return;}
+  const isAdmin=currentProfile.role==='admin';
+  body.innerHTML=`<table><thead><tr><th>#</th><th>ID Entregador</th><th>Nome</th><th>CPF</th><th>Modal</th><th>MEI</th><th>Score</th><th>Nível</th><th>Ações</th></tr></thead><tbody>
+  ${data.map((d,i)=>`<tr>
+    <td class="text-mono" style="color:var(--text3)">${i+1}</td>
+    <td class="text-mono" style="font-size:11px;color:var(--text2)">${d.id_entregador||'—'}</td>
+    <td style="font-weight:500">${d.nome}</td>
+    <td class="text-mono" style="font-size:11px">${d.cpf||'—'}</td>
+    <td><span class="badge badge-driver">${d.modal||'Moto'}</span></td>
+    <td>${d.is_mei?'<span class="badge badge-approved">Sim</span>':'<span class="badge" style="background:var(--surface2);color:var(--text2);border:0.5px solid var(--border)">Não</span>'}</td>
+    <td><div class="score-bar"><div class="score-track"><div class="score-fill" style="width:${d.score||0}%"></div></div><span class="score-num" style="color:${scoreColor(d.score||0)};font-weight:500">${Math.round(d.score||0)}</span></div></td>
+    <td><span class="badge ${d.score>=80?'badge-approved':d.score>=60?'badge-pending':'badge-rejected'}">${d.score>=80?'Ótimo':d.score>=60?'Regular':'Baixo'}</span></td>
+    <td><div class="actions-cell">
+      <button class="btn btn-ghost btn-xs" onclick="openEditDriver(${JSON.stringify(d).replace(/"/g,'&quot;')})">Editar</button>
+      ${isAdmin?`<button class="btn btn-ghost btn-xs" onclick="openPerfModal('${d.id}','${d.nome}')">Performance</button>`:''}
+    </div></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+async function addDriver(){
+  const nome=document.getElementById('new-driver-name').value.trim();
+  const email=document.getElementById('new-driver-email').value.trim();
+  const pass=document.getElementById('new-driver-pass').value;
+  if(!nome||!email||!pass){showErr('Preencha nome, e-mail e senha.','modal-driver-error');return;}
+  if(pass.length<6){showErr('Senha com mínimo 6 caracteres.','modal-driver-error');return;}
+  document.getElementById('btn-add-driver').disabled=true;
+  const{data:su,error:se}=await sb.auth.signUp({email,password:pass,options:{data:{nome,role:'entregador'}}});
+  if(se){showErr('Erro: '+se.message,'modal-driver-error');document.getElementById('btn-add-driver').disabled=false;return;}
+  await sb.from('profiles').upsert({
+    id:su.user.id, nome, email,
+    telefone:document.getElementById('new-driver-phone').value,
+    cpf:document.getElementById('new-driver-cpf').value,
+    data_nascimento:document.getElementById('new-driver-nascimento').value||null,
+    modal:document.getElementById('new-driver-modal').value,
+    is_mei:document.getElementById('new-driver-mei').value==='true',
+    score:parseFloat(document.getElementById('new-driver-score').value)||70,
+    id_entregador:document.getElementById('new-driver-idext').value,
+    role:'entregador',
   });
+  closeModal('modal-add-driver'); document.getElementById('btn-add-driver').disabled=false; loadDriversTable();
 }
 
-function showShiftDetail(shift, dayIndex, drivers) {
-  document.getElementById('shift-detail-title').textContent = `${shift.nome} — ${DAY_FULL[dayIndex]}`;
-  const body = document.getElementById('shift-detail-body');
-
-  if (!drivers.length) {
-    body.innerHTML = '<div class="empty">Nenhum entregador alocado neste turno.</div>';
-  } else {
-    body.innerHTML = `<table>
-      <thead><tr><th>Entregador</th><th>Score</th></tr></thead>
-      <tbody>
-      ${drivers.map(r => `<tr>
-        <td>${r.profile?.nome || '—'}</td>
-        <td>
-          <div class="score-bar">
-            <div class="score-track"><div class="score-fill" style="width:${r.profile?.score||0}%"></div></div>
-            <span class="score-num" style="color:${scoreBadgeColor(r.profile?.score||0)}">${Math.round(r.profile?.score||0)}</span>
-          </div>
-        </td>
-      </tr>`).join('')}
-      </tbody></table>`;
-  }
-
-  openModal('modal-shift-detail');
+function openEditDriver(d){
+  document.getElementById('edit-driver-id').value=d.id;
+  document.getElementById('edit-driver-name').value=d.nome||'';
+  document.getElementById('edit-driver-idext').value=d.id_entregador||'';
+  document.getElementById('edit-driver-cpf').value=d.cpf||'';
+  document.getElementById('edit-driver-nascimento').value=d.data_nascimento||'';
+  document.getElementById('edit-driver-phone').value=d.telefone||'';
+  document.getElementById('edit-driver-modal').value=d.modal||'Moto';
+  document.getElementById('edit-driver-mei').value=d.is_mei?'true':'false';
+  document.getElementById('edit-driver-score').value=d.score||70;
+  openModal('modal-edit-driver');
 }
 
-// ──────────────────────────────────────────
-// ADMIN — ENTREGADORES
-// ──────────────────────────────────────────
-async function loadDriversTable() {
-  const body = document.getElementById('drivers-table-body');
-  const { data } = await sb.from('profiles').select('*').eq('role', 'entregador').order('score', { ascending: false });
-
-  if (!data?.length) { body.innerHTML = '<div class="empty">Nenhum entregador cadastrado ainda.</div>'; return; }
-
-  body.innerHTML = `<table>
-    <thead><tr><th>#</th><th>Nome</th><th>E-mail</th><th>Score</th><th>Performance</th><th>Ações</th></tr></thead>
-    <tbody>
-    ${data.map((d, i) => `<tr>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace">${i+1}</td>
-      <td style="font-weight:500">${d.nome}</td>
-      <td style="color:var(--text2)">${d.email || '—'}</td>
-      <td>
-        <div class="score-bar">
-          <div class="score-track"><div class="score-fill" style="width:${d.score||0}%"></div></div>
-          <span class="score-num" style="color:${scoreBadgeColor(d.score||0)};font-weight:500">${Math.round(d.score||0)}</span>
-        </div>
-      </td>
-      <td><span class="badge ${d.score>=80?'badge-approved':d.score>=60?'badge-pending':'badge-rejected'}">${d.score>=80?'Ótimo':d.score>=60?'Regular':'Baixo'}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn btn-ghost btn-sm" onclick="openPerfModal('${d.id}','${d.nome}')">Atualizar perf.</button>
-        </div>
-      </td>
-    </tr>`).join('')}
-    </tbody></table>`;
+async function saveEditDriver(){
+  const id=document.getElementById('edit-driver-id').value;
+  await sb.from('profiles').update({
+    nome:document.getElementById('edit-driver-name').value,
+    id_entregador:document.getElementById('edit-driver-idext').value,
+    cpf:document.getElementById('edit-driver-cpf').value,
+    data_nascimento:document.getElementById('edit-driver-nascimento').value||null,
+    telefone:document.getElementById('edit-driver-phone').value,
+    modal:document.getElementById('edit-driver-modal').value,
+    is_mei:document.getElementById('edit-driver-mei').value==='true',
+    score:parseFloat(document.getElementById('edit-driver-score').value)||70,
+  }).eq('id',id);
+  closeModal('modal-edit-driver'); loadDriversTable();
 }
 
-async function addDriver() {
-  const nome = document.getElementById('new-driver-name').value.trim();
-  const email = document.getElementById('new-driver-email').value.trim();
-  const phone = document.getElementById('new-driver-phone').value.trim();
-  const score = parseFloat(document.getElementById('new-driver-score').value) || 70;
-  const pass = document.getElementById('new-driver-pass').value;
-
-  if (!nome || !email || !pass) { showError('Preencha nome, e-mail e senha.', 'modal-driver-error'); return; }
-  if (pass.length < 6) { showError('Senha deve ter ao menos 6 caracteres.', 'modal-driver-error'); return; }
-
-  const btn = document.getElementById('btn-add-driver');
-  btn.textContent = 'Cadastrando...';
-  btn.disabled = true;
-
-  const { data, error } = await sb.auth.admin.createUser({ email, password: pass, email_confirm: true });
-
-  if (error) {
-    // Fallback: sign up normal (o trigger vai criar o profile)
-    const { data: su, error: se } = await sb.auth.signUp({ email, password: pass });
-    if (se) { showError('Erro: ' + se.message, 'modal-driver-error'); btn.textContent = 'Cadastrar'; btn.disabled = false; return; }
-
-    await sb.from('profiles').upsert({
-      id: su.user.id,
-      nome,
-      email,
-      telefone: phone,
-      score,
-      role: 'entregador'
-    });
-  } else {
-    await sb.from('profiles').upsert({
-      id: data.user.id,
-      nome,
-      email,
-      telefone: phone,
-      score,
-      role: 'entregador'
-    });
-  }
-
-  closeModal('modal-add-driver');
-  btn.textContent = 'Cadastrar';
-  btn.disabled = false;
-  loadDriversTable();
-}
-
-function openPerfModal(id, nome) {
-  document.getElementById('perf-driver-id').value = id;
-  document.getElementById('perf-driver-name').value = nome;
-  const now = new Date();
-  document.getElementById('perf-month').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+function openPerfModal(id,nome){
+  document.getElementById('perf-driver-id').value=id;
+  document.getElementById('perf-driver-name').value=nome;
+  const now=new Date();
+  document.getElementById('perf-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   openModal('modal-perf');
 }
-
-async function savePerformance() {
-  const userId = document.getElementById('perf-driver-id').value;
-  const delivery = parseFloat(document.getElementById('perf-delivery').value);
-  const rating = parseFloat(document.getElementById('perf-rating').value);
-  const attendance = parseFloat(document.getElementById('perf-attendance').value);
-  const month = document.getElementById('perf-month').value;
-
-  if (isNaN(delivery)||isNaN(rating)||isNaN(attendance)) { showError('Preencha todos os campos.','modal-perf-error'); return; }
-
-  const score = Math.round((delivery * 0.4) + (rating * 10 * 0.3) + (attendance * 0.3));
-
-  await sb.from('performance').upsert({
-    usuario_id: userId,
-    mes: month,
-    entregas_prazo: delivery,
-    avaliacao_cliente: rating,
-    assiduidade: attendance,
-    score
-  }, { onConflict: 'usuario_id,mes' });
-
-  await sb.from('profiles').update({ score }).eq('id', userId);
-
-  closeModal('modal-perf');
-  loadDriversTable();
+async function savePerformance(){
+  const userId=document.getElementById('perf-driver-id').value;
+  const delivery=parseFloat(document.getElementById('perf-delivery').value);
+  const rating=parseFloat(document.getElementById('perf-rating').value);
+  const attendance=parseFloat(document.getElementById('perf-attendance').value);
+  const month=document.getElementById('perf-month').value;
+  if(isNaN(delivery)||isNaN(rating)||isNaN(attendance)){showErr('Preencha todos os campos.','modal-perf-error');return;}
+  const score=Math.min(100,Math.round((delivery*.4)+(rating*10*.3)+(attendance*.3)));
+  await sb.from('performance').upsert({usuario_id:userId,mes:month,entregas_prazo:delivery,avaliacao_cliente:rating,assiduidade:attendance,score},{onConflict:'usuario_id,mes'});
+  await sb.from('profiles').update({score}).eq('id',userId);
+  closeModal('modal-perf'); loadDriversTable();
 }
 
-// ──────────────────────────────────────────
-// ADMIN — TURNOS
-// ──────────────────────────────────────────
-async function loadShiftsTable() {
-  const body = document.getElementById('shifts-table-body');
-  const { data } = await sb.from('turnos').select('*').order('horario_inicio');
-
-  if (!data?.length) { body.innerHTML = '<div class="empty">Nenhum turno cadastrado. Crie o primeiro!</div>'; return; }
-
-  body.innerHTML = `<table>
-    <thead><tr><th>Nome</th><th>Início</th><th>Fim</th><th>Vagas/dia</th><th>Ações</th></tr></thead>
-    <tbody>
-    ${data.map(s => `<tr>
-      <td style="font-weight:500">${s.nome}</td>
-      <td style="font-family:'DM Mono',monospace">${s.horario_inicio.slice(0,5)}</td>
-      <td style="font-family:'DM Mono',monospace">${s.horario_fim.slice(0,5)}</td>
-      <td>${s.vagas}</td>
-      <td>
-        <button class="btn btn-danger btn-sm" onclick="deleteShift('${s.id}')">Excluir</button>
-      </td>
-    </tr>`).join('')}
-    </tbody></table>`;
+// ── TURNOS ───────────────────────────────
+async function loadShiftsTable(){
+  const body=document.getElementById('shifts-table-body');
+  const[{data:shifts},{data:vagas}]=await Promise.all([sb.from('turnos').select('*').order('horario_inicio'),sb.from('turno_vagas').select('*')]);
+  if(!shifts?.length){body.innerHTML='<div class="empty">Nenhum turno cadastrado.</div>';return;}
+  const vMap={};(vagas||[]).forEach(v=>vMap[v.turno_id+'_'+v.dia_semana]=v.vagas);
+  body.innerHTML=`<table><thead><tr><th>Nome</th><th>Horário</th><th>Vagas por dia</th><th>Ações</th></tr></thead><tbody>
+  ${shifts.map(s=>{
+    const vc=DAYS.map((d,i)=>`<span style="font-size:11px;color:var(--text2)">${d.slice(0,1)}:<strong style="color:var(--text)">${vMap[s.id+'_'+i]??s.vagas??5}</strong></span>`).join(' ');
+    return `<tr><td style="font-weight:500">${s.nome}</td><td class="text-mono" style="font-size:12px">${s.horario_inicio.slice(0,5)}–${s.horario_fim.slice(0,5)}</td><td>${vc}</td>
+      <td><div class="actions-cell"><button class="btn btn-ghost btn-xs" onclick="openEditVagas('${s.id}','${s.nome}')">Editar vagas</button><button class="btn btn-danger btn-xs" onclick="deleteShift('${s.id}')">Excluir</button></div></td>
+    </tr>`;}).join('')}</tbody></table>`;
 }
-
-async function addShift() {
-  const nome = document.getElementById('new-shift-name').value.trim();
-  const start = document.getElementById('new-shift-start').value.trim();
-  const end = document.getElementById('new-shift-end').value.trim();
-  const slots = parseInt(document.getElementById('new-shift-slots').value) || 5;
-
-  if (!nome || !start || !end) { showError('Preencha todos os campos.', 'modal-shift-error'); return; }
-
-  const { error } = await sb.from('turnos').insert({ nome, horario_inicio: start + ':00', horario_fim: end + ':00', vagas: slots });
-  if (error) { showError('Erro: ' + error.message, 'modal-shift-error'); return; }
-
-  closeModal('modal-add-shift');
+async function addShift(){
+  const nome=document.getElementById('new-shift-name').value.trim();
+  const start=document.getElementById('new-shift-start').value.trim();
+  const end=document.getElementById('new-shift-end').value.trim();
+  if(!nome||!start||!end){showErr('Preencha todos os campos.','modal-shift-error');return;}
+  const vagasInputs=[...document.querySelectorAll('#vagas-grid .vaga-input')].map(i=>parseInt(i.value)||5);
+  const{data:shift,error}=await sb.from('turnos').insert({nome,horario_inicio:start+':00',horario_fim:end+':00',vagas:vagasInputs[1]}).select().single();
+  if(error){showErr('Erro: '+error.message,'modal-shift-error');return;}
+  await sb.from('turno_vagas').upsert(vagasInputs.map((v,i)=>({turno_id:shift.id,dia_semana:i,vagas:v})),{onConflict:'turno_id,dia_semana'});
+  closeModal('modal-add-shift'); loadShiftsTable();
+}
+async function openEditVagas(shiftId,nome){
+  document.getElementById('edit-vagas-shift-id').value=shiftId;
+  document.getElementById('edit-vagas-title').textContent=`Vagas — ${nome}`;
+  const{data}=await sb.from('turno_vagas').select('*').eq('turno_id',shiftId);
+  const vMap={};(data||[]).forEach(v=>vMap[v.dia_semana]=v.vagas);
+  document.getElementById('edit-vagas-grid').innerHTML=DAYS.map((d,i)=>`<div class="vaga-cell"><div class="vaga-cell-label">${d}</div><input type="number" min="0" value="${vMap[i]??5}" data-dia="${i}"/></div>`).join('');
+  openModal('modal-edit-vagas');
+}
+async function saveVagas(){
+  const shiftId=document.getElementById('edit-vagas-shift-id').value;
+  const inputs=[...document.querySelectorAll('#edit-vagas-grid input')];
+  await sb.from('turno_vagas').upsert(inputs.map(i=>({turno_id:shiftId,dia_semana:parseInt(i.dataset.dia),vagas:parseInt(i.value)||0})),{onConflict:'turno_id,dia_semana'});
+  closeModal('modal-edit-vagas'); loadShiftsTable();
+}
+async function deleteShift(id){
+  if(!confirm('Excluir este turno?'))return;
+  await sb.from('solicitacoes').delete().eq('turno_id',id);
+  await sb.from('turno_vagas').delete().eq('turno_id',id);
+  await sb.from('turnos').delete().eq('id',id);
   loadShiftsTable();
 }
 
-async function deleteShift(id) {
-  if (!confirm('Excluir este turno? Todas as solicitações relacionadas também serão removidas.')) return;
-  await sb.from('solicitacoes').delete().eq('turno_id', id);
-  await sb.from('turnos').delete().eq('id', id);
-  loadShiftsTable();
+// ══════════════════════════════════════════
+// UPLOAD E ANÁLISE DE RELATÓRIOS
+// ══════════════════════════════════════════
+function dragOver(e){e.preventDefault();document.getElementById('upload-zone').classList.add('drag-over');}
+function dragLeave(e){document.getElementById('upload-zone').classList.remove('drag-over');}
+function dropFile(e){e.preventDefault();dragLeave();const f=e.dataTransfer.files[0];if(f)setFile(f);}
+function fileSelected(input){if(input.files[0])setFile(input.files[0]);}
+function setFile(f){uploadedFile=f;document.getElementById('upload-filename').textContent=f.name;}
+
+async function uploadRelatorio(){
+  if(!uploadedFile){showErr('Selecione um arquivo CSV.','modal-upload-error');return;}
+  const dataRef=document.getElementById('upload-data-ref').value;
+  if(!dataRef){showErr('Informe a data de referência.','modal-upload-error');return;}
+  const btn=document.getElementById('btn-upload');
+  btn.textContent='Processando...'; btn.disabled=true;
+  const text=await uploadedFile.text();
+  const linhas=parseCSV(text);
+  if(!linhas.length){showErr('Nenhum dado encontrado no CSV.','modal-upload-error');btn.textContent='Processar e salvar';btn.disabled=false;return;}
+  const{data:rel,error:re}=await sb.from('relatorios').insert({nome_arquivo:uploadedFile.name,data_ref:dataRef,enviado_por:currentUser.id}).select().single();
+  if(re){showErr('Erro ao salvar: '+re.message,'modal-upload-error');btn.textContent='Processar e salvar';btn.disabled=false;return;}
+  const rows=linhas.map(l=>({...l,relatorio_id:rel.id}));
+  const CHUNK=50;
+  for(let i=0;i<rows.length;i+=CHUNK){
+    await sb.from('relatorio_linhas').insert(rows.slice(i,i+CHUNK));
+  }
+  btn.textContent='Processar e salvar'; btn.disabled=false;
+  uploadedFile=null;
+  document.getElementById('upload-filename').textContent='Somente arquivos .csv do relatório de desempenho';
+  showOk(`✓ ${linhas.length} registros importados com sucesso!`,'modal-upload-success');
+  setTimeout(()=>closeModal('modal-upload'),2500);
+  loadRelatorioAdmin();
 }
 
-// ──────────────────────────────────────────
-// BOOT
-// ──────────────────────────────────────────
+async function loadRelatorioAdmin(){
+  const de=document.getElementById('rel-filtro-de').value;
+  const ate=document.getElementById('rel-filtro-ate').value;
+  const entId=document.getElementById('rel-filtro-entregador').value;
+  const statsEl=document.getElementById('rel-stats');
+  const rankBody=document.getElementById('rel-ranking-body');
+  const detailBody=document.getElementById('rel-detail-body');
+  statsEl.innerHTML=''; rankBody.innerHTML='<div class="loading"><span class="dot-blink">Carregando</span></div>'; detailBody.innerHTML='';
+
+  let q=sb.from('relatorio_linhas').select('*').order('data',{ascending:false});
+  if(de)q=q.gte('data',de);
+  if(ate)q=q.lte('data',ate);
+  if(entId)q=q.eq('id_entregador',entId);
+  const{data}=await q;
+
+  // Popula select de entregadores (apenas uma vez)
+  const sel=document.getElementById('rel-filtro-entregador');
+  if(sel.options.length<=1){
+    const{data:allEnt}=await sb.from('relatorio_linhas').select('id_entregador,nome_completo');
+    const uniq={};(allEnt||[]).forEach(r=>{if(r.id_entregador)uniq[r.id_entregador]=r.nome_completo;});
+    Object.entries(uniq).sort((a,b)=>a[1]?.localeCompare(b[1])).forEach(([id,nome])=>{const o=document.createElement('option');o.value=id;o.textContent=nome;sel.appendChild(o);});
+  }
+
+  if(!data?.length){statsEl.innerHTML='';rankBody.innerHTML='<div class="empty">Nenhum dado encontrado. Faça o upload de um relatório.</div>';detailBody.innerHTML='';return;}
+
+  // Agrupa por entregador para ranking
+  const byEnt={};
+  data.forEach(r=>{
+    const k=r.id_entregador;
+    if(!byEnt[k])byEnt[k]={id:k,nome:r.nome_completo,rows:[]};
+    byEnt[k].rows.push(r);
+  });
+
+  const ranking=Object.values(byEnt).map(e=>{
+    const rows=e.rows;
+    const avgTO=avg(rows.map(r=>r.pct_tempo_online).filter(v=>v!==null));
+    const avgAc=avg(rows.map(r=>r.pct_aceitacao).filter(v=>v!==null));
+    const avgRec=avg(rows.map(r=>r.pct_recusas_entregador).filter(v=>v!==null));
+    const avgEnt=avg(rows.map(r=>r.pct_entregues).filter(v=>v!==null));
+    const nTO=nivelTempoOnline(avgTO), nAc=nivelAceitacao(avgAc), nG=nivelGeral(nTO,nAc);
+    return{...e,avgTO,avgAc,avgRec,avgEnt,nTO,nAc,nG,totalRegistros:rows.length};
+  });
+
+  // Ordena: A primeiro, depois por avgTO
+  const nivelOrder={A:3,B:2,C:1};
+  ranking.sort((a,b)=>nivelOrder[b.nG]-nivelOrder[a.nG]||(b.avgTO||0)-(a.avgTO||0));
+
+  // Stats globais
+  const totalA=ranking.filter(r=>r.nG==='A').length;
+  const totalB=ranking.filter(r=>r.nG==='B').length;
+  const totalC=ranking.filter(r=>r.nG==='C').length;
+  const gAvgTO=avg(ranking.map(r=>r.avgTO).filter(v=>v!==null));
+  const gAvgAc=avg(ranking.map(r=>r.avgAc).filter(v=>v!==null));
+  statsEl.innerHTML=`
+    <div class="stat-card"><div class="stat-label">Entregadores</div><div class="stat-value">${ranking.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Nível A</div><div class="stat-value" style="color:var(--green)">${totalA}</div><div class="stat-sub">excelentes</div></div>
+    <div class="stat-card"><div class="stat-label">Nível B</div><div class="stat-value" style="color:var(--amber)">${totalB}</div><div class="stat-sub">regulares</div></div>
+    <div class="stat-card"><div class="stat-label">Nível C</div><div class="stat-value" style="color:var(--red)">${totalC}</div><div class="stat-sub">críticos</div></div>
+    <div class="stat-card"><div class="stat-label">Tempo online médio</div><div class="stat-value">${pctFmt(gAvgTO)}</div></div>
+    <div class="stat-card"><div class="stat-label">Aceitação média</div><div class="stat-value">${pctFmt(gAvgAc)}</div></div>
+  `;
+
+  rankBody.innerHTML=`<table><thead><tr><th>#</th><th>Entregador</th><th>Registros</th><th>Tempo Online</th><th>Nível TO</th><th>Aceitação</th><th>Nível Ac</th><th>% Recusadas</th><th>% Entregues</th><th>Nível Geral</th></tr></thead><tbody>
+  ${ranking.map((e,i)=>`<tr>
+    <td class="text-mono" style="color:var(--text3)">${i+1}</td>
+    <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis">${e.nome||'—'}</td>
+    <td class="text-mono">${e.totalRegistros}</td>
+    <td>${pctFmt(e.avgTO)}</td><td>${nivelBadge(e.nTO)}</td>
+    <td>${pctFmt(e.avgAc)}</td><td>${nivelBadge(e.nAc)}</td>
+    <td>${pctFmt(e.avgRec)}</td>
+    <td>${pctFmt(e.avgEnt)}</td>
+    <td>${nivelBadge(e.nG)}</td>
+  </tr>`).join('')}</tbody></table>`;
+
+  // Detalhamento linha a linha
+  detailBody.innerHTML=`<table><thead><tr><th>Data</th><th>Entregador</th><th>Tempo Online</th><th>Aceitação</th><th>Recusadas</th><th>Entregues</th><th>Score</th><th>Abs.</th><th>Nível Geral</th></tr></thead><tbody>
+  ${data.map(r=>`<tr>
+    <td class="text-mono">${r.data||'—'}</td>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${r.nome_completo||'—'}</td>
+    <td>${pctFmt(r.pct_tempo_online)}</td>
+    <td>${pctFmt(r.pct_aceitacao)}</td>
+    <td>${pctFmt(r.pct_recusas_entregador)}</td>
+    <td>${r.entregues??'—'}</td>
+    <td>${pctFmt(r.score_performance)}</td>
+    <td>${pctFmt(r.pct_absenteismo)}</td>
+    <td>${nivelBadge(r.nivel_geral)}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+function clearRelFiltros(){
+  document.getElementById('rel-filtro-de').value='';
+  document.getElementById('rel-filtro-ate').value='';
+  document.getElementById('rel-filtro-entregador').value='';
+  loadRelatorioAdmin();
+}
+
+function avg(arr){if(!arr.length)return null;return arr.reduce((s,v)=>s+v,0)/arr.length;}
+
+// ── CSV EXPORT ───────────────────────────
+async function exportCSV(){
+  const weekStart=getWeekStart(adminWeekOffset);
+  const weekISO=toISO(weekStart);
+  const[{data:shifts},{data:approved}]=await Promise.all([
+    sb.from('turnos').select('*').order('horario_inicio'),
+    sb.from('solicitacoes').select('*,profile:usuario_id(nome,score,modal,cpf)').eq('status','aprovado').eq('semana_inicio',weekISO),
+  ]);
+  const rows=[['Entregador','CPF','Modal','Score','Turno','Horário','Dia','Data']];
+  for(let di=0;di<7;di++){
+    const date=new Date(weekStart); date.setDate(weekStart.getDate()+di);
+    const dateStr=`${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
+    (shifts||[]).forEach(shift=>{
+      const drivers=(approved||[]).filter(r=>r.turno_id===shift.id&&r.dia_semana===di);
+      if(!drivers.length)rows.push(['(vazio)','—','—','—',shift.nome,`${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}`,DAYS_FULL[di],dateStr]);
+      else drivers.forEach(r=>rows.push([r.profile?.nome||'—',r.profile?.cpf||'—',r.profile?.modal||'—',Math.round(r.profile?.score||0),shift.nome,`${shift.horario_inicio.slice(0,5)}–${shift.horario_fim.slice(0,5)}`,DAYS_FULL[di],dateStr]));
+    });
+  }
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`escala_${weekISO}.csv`;
+  a.click();
+}
+
 init();
 </script>
 </body>
